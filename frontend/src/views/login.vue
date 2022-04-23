@@ -8,7 +8,6 @@
       </div>
       <div class="card-body text-base leading-6">
         <p style="color: red">撸豆有可能造成的任何损失本人概不负责！！！！！！！！！</p>
-        <p style="color: red">站点出现问题可在群里联系群主（如鲸向海鸟投林）。</p>
         <p>为了您的财产安全请关闭免密支付以及打开支付验密（京东-设置-支付设置-支付验密设置）。</p>
         <p>建议京东账户绑定微信以保证提现能到账。</p>
         <p style="font-weight: bold;">安全起见，切勿泄露您的cookie！</p>
