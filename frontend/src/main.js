@@ -1,11 +1,11 @@
-import { ElButton, ElInput, ElMessage } from 'element-plus'
+import { ElButton, ElInput, ElMessage, ElMessageBox } from 'element-plus'
 import 'element-plus/lib/theme-chalk/base.css'
 import { createApp } from 'vue'
 import App from './App.vue'
 import './index.css'
 import router from './router'
 
-const components = [ElButton, ElInput, ElMessage]
+const components = [ElButton, ElInput, ElMessage, ElMessageBox ]
 const plugins = [ElMessage]
 
 const app = createApp(App)
