@@ -5,8 +5,7 @@ require('dotenv').config();
 const {readFile} = require('fs/promises');
 
 const api = got.extend({
-    // prefixUrl: process.env.QL_URL || 'http://localhost:5600',
-    prefixUrl: "https://ql.ashaiw.top/",
+    prefixUrl: process.env.QL_URL || 'http://localhost:5600',
     retry: {limit: 0},
 });
 
