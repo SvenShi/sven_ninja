@@ -1,4 +1,10 @@
-# Ninja 
+# 2022/04/24更新
+
+更换请求接口为青龙OpenAPI接口,废弃之前的api接口。适配高版本。
+
+改用OpenAPI解决以往token过期需要重新登录一次青龙的问题
+
+# Ninja
 
 支持CK注册，登录和删除，支持WSKEY录入和删除，登录成功进入个人中心，可修改备注。默认登录CK才可提交WSCK，主页提交WSCK容易乱，不建议。
 
@@ -151,6 +157,8 @@ QL_URL=http://localhost:5700
 - `SHOW_QR`：是否显示扫码卡片，默认不显示
 - `SHOW_WSCK`：是否显示WSCK录入，默认不显示
 - `SHOW_CK`：是否显示CK登录，默认不显示
+- `CLIENT_ID`：青龙授权id（必填）
+- `CLIENT_SECRET`：青龙授权密码（必填）
 - `ALLOW_WSCK_ADD`：是否允许添加WSCK账号 不允许添加时则只允许已有账号登录
 - `ALLOW_WSCK_NUM`：允许添加WSCK账号的最大数量
 - `ALLOW_ADD`: 是否允许添加账号 不允许添加时则只允许已有账号登录（默认 `true`）
@@ -158,7 +166,7 @@ QL_URL=http://localhost:5700
 - `NINJA_PORT`: Ninja 运行端口（默认 `5701`）
 - `NINJA_NOTIFY`: 是否开启通知功能（默认 `true`）
 - `NINJA_UA`: 自定义 UA，默认为随机
-- 
+-
 
 配置方式：
 
