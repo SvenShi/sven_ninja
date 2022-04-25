@@ -23,10 +23,9 @@
           <span class="ml-2 px-2 py-1 bg-gray-200 rounded-full font-normal text-xs">余量：{{ marginCount }}</span>
         </div>
         <div class="card-body text-base leading-6">
-          <p>电脑用户浏览器登录<a style="" href="https://m.jd.com/" target="_blank">JD官网</a>，点击我的出现登录页面后点击F12，通过开发者工具获取cookie。
-          </p>
-          <p>手机用户可以使用Alook浏览器登录<a style="" href="https://m.jd.com/" target="_blank" id="jd">JD官网</a>，并在菜单-工具箱-开发者工具-Cookies中获取（Android和iPhone通用）。
-          </p>
+          <p>安卓手机傻瓜式获取CK（强烈推荐，非常方便）<a style="" href="https://github.com/ZhuSky/JDCookie" target="_blank">点此访问下载连接</a></p>
+          <p>电脑用户浏览器登录<a style="" href="https://m.jd.com/" target="_blank">JD官网</a>，点击我的出现登录页面后点击F12，通过开发者工具获取cookie。</p>
+          <p>手机用户可以使用Alook浏览器登录<a style="" href="https://m.jd.com/" target="_blank" id="jd">JD官网</a>，并在菜单-工具箱-开发者工具-Cookies中获取（Android和iPhone通用）。</p>
           <p>另外也可以使用抓包工具（iPhone：Stream，Android：HttpCanary）抓取京东app的ck</p>
           <p>cookie直接填入输入框即可，Ninja会自动正则提取pt_key和pt_pin。</p>
         </div>
