@@ -15,11 +15,30 @@
       <div class="card-footet"></div>
     </div>
 
-
-    <div class="card">
+    <div v-if="showLogin" class="card">
       <div class="card-header">
         <div class="flex items-center justify-between">
-          <p class="card-title">CK 登录</p>
+          <p class="card-title">登录</p>
+        </div>
+      </div>
+      <div style="padding: 30px">
+        <el-form :model="userInfo" label-width="30%" size="small">
+          <el-form-item label="用户名" prop="username">
+            <el-input v-model="userInfo.username" style="width: 50%;margin-left: 20px"/>
+          </el-form-item>
+          <el-form-item style="text-align: center;" label-width="0px">
+            <el-button type="primary" :disabled="!userInfo.username" size="small" @click="loginUser">登录</el-button>
+            <el-button @click="openRegister" v-if="allowAdd" size="small">注册</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </div>
+
+
+    <div v-if="showRegister" class="card">
+      <div class="card-header">
+        <div class="flex items-center justify-between">
+          <p class="card-title">注册</p>
           <span class="ml-2 px-2 py-1 bg-gray-200 rounded-full font-normal text-xs">余量：{{ marginCount }}</span>
         </div>
         <div class="card-body text-base leading-6">
@@ -28,31 +47,39 @@
           <p>手机用户可以使用Alook浏览器登录<a style="" href="https://m.jd.com/" target="_blank" id="jd">JD官网</a>，并在菜单-工具箱-开发者工具-Cookies中获取（Android和iPhone通用）。</p>
           <p>另外也可以使用抓包工具（iPhone：Stream，Android：HttpCanary）抓取京东app的ck</p>
           <p>cookie直接填入输入框即可，Ninja会自动正则提取pt_key和pt_pin。</p>
+          <span class="card-subtitle" style="color: red"> 可以直接填写整个cookie。</span><br/>
+          <span class="card-subtitle" style="color: red"> 注意格式（pt_key=xxxxxxxxxxxxxxx;pt_pin=xxxxxxxxxxxxxx;）注意分号不能少！</span><br/>
+          <span class="card-subtitle"> 请在下方输入您的 cookie 注册。</span><br/>
         </div>
-        <span class="card-subtitle" style="color: red"> 可以直接填写整个cookie。 </span><br/>
-        <span class="card-subtitle"
-              style="color: red"> 注意格式（pt_key=xxxxxxxxxxxxxxx;pt_pin=xxxxxxxxxxxxxx;）注意分号不能少！ </span><br/>
-        <span class="card-subtitle"> 请在下方输入您的 cookie 登录。 </span><br/>
-
       </div>
-      <div class="card-body text-center">
-        <el-input v-model="nickName" size="small" style="width: 300px; float: left" placeholder="备注" clearable/>
-        <el-input v-model="cookie" size="small" placeholder="Cookie" clearable class="my-4 w-full"/>
-        <el-button type="primary" size="small" round @click="CKLogin">登录</el-button>
+      <div style="padding: 30px">
+        <el-form :model="userInfo" :rules="registerRules" size="small" label-width="30%">
+          <el-form-item label="用户名" prop="username">
+            <el-input v-model="userInfo.username" style="width: 50%;margin-left: 20px"></el-input>
+          </el-form-item>
+          <el-form-item label="Cookie" prop="cookie">
+            <el-input v-model="userInfo.cookie" style="width: 70%;margin-left: 20px"></el-input>
+          </el-form-item>
+          <el-form-item style="text-align: center;" label-width="0px">
+            <el-button type="primary" @click="registerConfirm" size="small">确定</el-button>
+            <el-button @click="registerCancel" size="small">返回</el-button>
+          </el-form-item>
+        </el-form>
       </div>
-      <div class="card-footet"></div>
     </div>
+
+
   </div>
 </template>
 
 <script>
 import {onMounted, reactive, toRefs} from 'vue'
 import {useRouter} from 'vue-router'
-import {ElMessage, ElMessageBox} from 'element-plus'
+import {ElMessage} from 'element-plus'
 import {
   getInfoAPI,
-  CKLoginAPI,
-  checkLoginAPI
+  login,
+  registerUser
 } from '@/api'
 
 export default {
@@ -62,106 +89,102 @@ export default {
     let data = reactive({
       marginCount: 0,
       allowAdd: true,
-      cookie: '',
-      token: undefined,
-      okl_token: undefined,
-      cookies: undefined,
-      timer: undefined,
-      waitLogin: false,
-      nickName: undefined,
-
+      showRegister: false,
+      showLogin: true,
+      userInfo: {
+        username: undefined,
+        cookie: '',
+        ptKey: '',
+        ptPin: ''
+      },
+      registerRules: {
+        username: [
+          {required: true, message: "请输入用户名", trigger: 'blur'}
+        ],
+        cookie: [
+          {required: true, message: "请输入cookie", trigger: 'blur'}
+        ]
+      }
     })
 
     const getInfo = async () => {
       const info = (await getInfoAPI()).data
       data.marginCount = info.marginCount
       data.allowAdd = info.allowAdd
-      data.marginWSCKCount = info.marginWSCKCount
-      data.allowWSCKAdd = info.allowWSCKAdd
-      data.showQR = info.showQR
-      data.showWSCK = info.showWSCK
-      data.showCK = info.showCK
-
     }
 
-    const ckeckLogin = async () => {
-      try {
-        const body = await checkLoginAPI({
-          token: data.token,
-          okl_token: data.okl_token,
-          cookies: data.cookies,
-        })
-
-        switch (body?.data.errcode) {
-          case 0:
-            localStorage.setItem('eid', body.data.eid)
-            ElMessage.success(body.message)
-            clearInterval(data.timer)
-            router.push('/')
-            break
-          case 176:
-            break
-          default:
-            ElMessage.error(body.message)
-            data.waitLogin = false
-            clearInterval(data.timer)
-            break
+    const loginUser = async () => {
+      const res = (await login(data.userInfo)).data
+      if (res.errCode === 0) {
+        //成功
+        localStorage.setItem('eid', res.eid)
+        router.push("/")
+      } else {
+        if (res.errCode === 404) {
+          ElMessage.error('未注册的用户')
         }
-      } catch (error) {
-        clearInterval(data.timer)
-        data.waitLogin = false
+        if (res.errCode === 500) {
+          ElMessage.error('未知错误')
+        }
       }
     }
 
-    const CKLogin = async () => {
+    const openRegister = async () => {
+      data.showLogin = false
+      data.showRegister = true
+    }
+
+    const registerConfirm = async () => {
       const ptKey =
-          data.cookie.match(/pt_key=(.*?);/) &&
-          data.cookie.match(/pt_key=(.*?);/)[1]
+          data.userInfo.cookie.match(/pt_key=(.*?);/) &&
+          data.userInfo.cookie.match(/pt_key=(.*?);/)[1]
       const ptPin =
-          data.cookie.match(/pt_pin=(.*?);/) &&
-          data.cookie.match(/pt_pin=(.*?);/)[1]
+          data.userInfo.cookie.match(/pt_pin=(.*?);/) &&
+          data.userInfo.cookie.match(/pt_pin=(.*?);/)[1]
       if (ptKey && ptPin) {
-        let body;
-        if (data.nickName) {
-          body = await CKLoginAPI({pt_key: ptKey, pt_pin: ptPin, nickName: data.nickName})
-          if (body.data.eid) {
-            localStorage.setItem('eid', body.data.eid)
-            ElMessage.success(body.message)
-            router.push('/')
-          } else {
-            ElMessage.error(body.message || 'cookie 解析失败，请检查后重试！')
-          }
-        } else {
-          ElMessageBox.confirm("建议填写具有辨识度的备注，以方便查看运行日志！", "提示", {
-            confirmButtonText: '返回填写备注',
-            cancelButtonText: '我不管，就用默认的！',
-          }).then(() => {
-          }).catch(async () => {
-            body = await CKLoginAPI({pt_key: ptKey, pt_pin: ptPin})
-            if (body.data.eid) {
-              localStorage.setItem('eid', body.data.eid)
-              ElMessage.success(body.message)
-              router.push('/')
-            } else {
-              ElMessage.error(body.message || 'cookie 解析失败，请检查后重试！')
-            }
-          })
-        }
+        data.userInfo.ptKey = ptKey
+        data.userInfo.ptPin = ptPin
       } else {
         ElMessage.error('cookie 解析失败，请检查后重试！')
+        return
+      }
+
+      const res = (await registerUser(data.userInfo)).data
+      if (res.errCode === 0) {
+        ElMessage.success(res.msg)
+        data.showLogin = true
+        data.showRegister = false
+      } else {
+        if (res.errCode === 201) {
+          ElMessage.error('用户名重复')
+        }
+        if (res.errCode === 500) {
+          ElMessage.error('未知错误')
+        }
       }
     }
 
+    const registerCancel = async () => {
+      data.showLogin = true
+      data.showRegister = false
+    }
 
     onMounted(() => {
-      getInfo()
+      const eid = localStorage.getItem('eid')
+      if (eid){
+        router.push("/")
+      }else {
+        getInfo()
+      }
     })
 
     return {
       ...toRefs(data),
       getInfo,
-      ckeckLogin,
-      CKLogin
+      loginUser,
+      registerConfirm,
+      registerCancel,
+      openRegister
     }
   },
 }

@@ -13,20 +13,19 @@ const app = new Koa();
 const router = new Router();
 
 const handler = async (ctx, next) => {
-  try {
-    await next();
-    if (ctx.body?.data.message) {
-      ctx.body.message = ctx.body.data.message;
-      ctx.body.data.message = undefined;
+    try {
+        await next();
+        if (ctx.body?.data.message) {
+            ctx.body.message = ctx.body.data.message;
+            ctx.body.data.message = undefined;
+        }
+    } catch (err) {
+        console.log(err);
+        ctx.status = err.statusCode || err.status || 500;
+        ctx.body = {
+            code: err.status || err.statusCode || 500, message: err.message,
+        };
     }
-  } catch (err) {
-    console.log(err);
-    ctx.status = err.statusCode || err.status || 500;
-    ctx.body = {
-      code: err.status || err.statusCode || 500,
-      message: err.message,
-    };
-  }
 };
 
 app.use(serve('static'));
@@ -35,73 +34,76 @@ app.use(handler);
 app.use(router.routes()).use(router.allowedMethods());
 
 router.get('/api/status', (ctx) => {
-  ctx.body = {
-    code: 200,
-    data: {
-      version: packageJson.version,
-    },
-    message: 'Ninja is already.',
-  };
+    ctx.body = {
+        code: 200, data: {
+            version: packageJson.version,
+        }, message: 'Ninja is already.',
+    };
 });
 
 router.get('/api/info', async (ctx) => {
-  const data = await User.getPoolInfo();
-  debugger
-  ctx.body = { data };
+    const data = await User.getPoolInfo();
+    debugger
+    ctx.body = {data};
 });
 
-router.post('/api/check', body(), async (ctx) => {
-  const body = ctx.request.body;
-  const user = new User(body);
-  const data = await user.checkQRLogin();
-  ctx.body = { data };
+router.post('/api/login', body(), async (ctx) => {
+    const body = ctx.request.body;
+    const user = new User(body);
+    const data = await user.login();
+    ctx.body = {data};
 });
 
-router.post('/api/cklogin', body(), async (ctx) => {
-  const body = ctx.request.body;
-  const user = new User(body);
-  const data = await user.CKLogin();
-  ctx.body = { data };
+router.post('/api/register', body(), async (ctx) => {
+    const body = ctx.request.body;
+    const user = new User(body);
+    const data = await user.register();
+    ctx.body = {data};
 });
 
 router.get('/api/userinfo', async (ctx) => {
-  const query = ctx.query;
-  const eid = query.eid;
-  const user = new User({ eid });
-  const data = await user.getUserInfoByEid();
-  ctx.body = { data };
+    const query = ctx.query;
+    const eid = query.eid;
+    const user = new User({eid});
+    const data = await user.getUserInfoByEid();
+    ctx.body = {data};
 });
+
 
 router.post('/api/delaccount', body(), async (ctx) => {
-  const body = ctx.request.body;
-  const eid = body.eid;
-  const user = new User({ eid });
-  const data = await user.delUserByEid();
-  ctx.body = { data };
+    const body = ctx.request.body;
+    const eid = body.eid;
+    const user = new User({eid});
+    const data = await user.delUserByEid();
+    ctx.body = {data};
 });
 
-router.post('/api/update/remark', body(), async (ctx) => {
-  const body = ctx.request.body;
-  const eid = body.eid;
-  const remark = body.remark;
-  const user = new User({ eid, remark });
-  const data = await user.updateRemark();
-  ctx.body = { data };
+router.post('/api/update', body(), async (ctx) => {
+    const body = ctx.request.body;
+    const eid = body.eid;
+    const username = body.username;
+    const ck = body.ck;
+    const user = new User({eid, ck, username});
+    const data = await user.update();
+    ctx.body = {data};
 });
 
-router.get('/api/users', async (ctx) => {
-  if (ctx.host.startsWith('localhost')) {
-    const data = await User.getUsers();
-    ctx.body = { data };
-  } else {
-    ctx.body = {
-      code: 401,
-      message: '该接口仅能通过 localhost 访问',
-    };
-  }
+router.post('/api/disable', body(), async (ctx) => {
+    const body = ctx.request.body;
+    const eid = body.eid;
+    const user = new User({eid});
+    const data = await user.disableEnv();
+    ctx.body = {data};
 });
 
-///////////////////////////////////////////////
+router.post('/api/enable', body(), async (ctx) => {
+    const body = ctx.request.body;
+    const eid = body.eid;
+    const user = new User({eid});
+    const data = await user.enableEnv();
+    ctx.body = {data};
+});
+
 
 const port = process.env.NINJA_PORT || 5701;
 console.log('Start Ninja success! listening port: ' + port);
