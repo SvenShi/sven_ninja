@@ -12,10 +12,6 @@ export function CKLoginAPI(body) {
   return api.post('cklogin', { json: body }).json()
 }
 
-export function getQrcodeAPI() {
-  return api.get('qrcode').json()
-}
-
 export function checkLoginAPI(body) {
   return api.post('check', { json: body }).json()
 }
@@ -32,22 +28,4 @@ export function delAccountAPI(body) {
 
 export function remarkupdateAPI(body) {
   return api.post('update/remark', { json: body }).json()
-}
-
-export function WSCKLoginAPI(body) {
-  return api.post('WSCKLogin', { json: body }).json()
-}
-
-export function getWSCKUserinfoAPI(eid) {
-  const searchParams = new URLSearchParams()
-  searchParams.set('wseid', wseid)
-  return api.get('WSCKUserinfo', { searchParams: searchParams }).json()
-}
-
-export function WSCKDelaccountAPI(body) {
-  return api.post('WSCKDelaccount', { json: body }).json()
-}
-
-export function remarkupdateWSCKAPI(body) {
-  return api.post('updateWSCK/remark', { json: body }).json()
 }

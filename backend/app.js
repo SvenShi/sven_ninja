@@ -50,20 +50,6 @@ router.get('/api/info', async (ctx) => {
   ctx.body = { data };
 });
 
-router.get('/api/qrcode', async (ctx) => {
-  const user = new User({});
-  await user.getQRConfig();
-  ctx.body = {
-    data: {
-      token: user.token,
-      okl_token: user.okl_token,
-      cookies: user.cookies,
-      QRCode: user.QRCode,
-      ua: user.ua,
-    },
-  };
-});
-
 router.post('/api/check', body(), async (ctx) => {
   const body = ctx.request.body;
   const user = new User(body);
@@ -113,40 +99,6 @@ router.get('/api/users', async (ctx) => {
       message: '该接口仅能通过 localhost 访问',
     };
   }
-});
-
-///////////////////////////////////////////////
-
-router.post('/api/WSCKLogin', body(), async (ctx) => {
-  const body = ctx.request.body;
-  const user = new User(body);
-  const data = await user.WSCKLogin();
-  ctx.body = { data };
-});
-
-router.get('/api/WSCKUserinfo', async (ctx) => {
-  const query = ctx.query;
-  const wseid = query.wseid;
-  const user = new User({ wseid });
-  const data = await user.getWSCKUserInfoByEid();
-  ctx.body = { data };
-});
-
-router.post('/api/WSCKDelaccount', body(), async (ctx) => {
-  const body = ctx.request.body;
-  const wseid = body.wseid;
-  const user = new User({ wseid });
-  const data = await user.delWSCKUserByEid();
-  ctx.body = { data };
-});
-
-router.post('/api/updateWSCK/remark', body(), async (ctx) => {
-  const body = ctx.request.body;
-  const wseid = body.wseid;
-  const remark = body.remark;
-  const user = new User({ wseid, remark });
-  const data = await user.updateWSCKRemark();
-  ctx.body = { data };
 });
 
 ///////////////////////////////////////////////

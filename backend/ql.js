@@ -5,7 +5,7 @@ require('dotenv').config();
 const {readFile} = require('fs/promises');
 
 const api = got.extend({
-    prefixUrl: process.env.QL_URL || 'http://localhost:5600',
+    prefixUrl: process.env.QL_URL || 'http://localhost:5600/',
     retry: {limit: 0},
 });
 
@@ -85,7 +85,6 @@ module.exports.updateEnv = async (cookie, eid, remarks) => {
             'Content-Type': 'application/json;charset=UTF-8',
         },
     }).json();
-    console.log(body)
     return body;
 };
 

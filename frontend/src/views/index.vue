@@ -23,7 +23,7 @@
         <el-input v-model="remark" size="small" clearable class="my-4 w-full"/>
       </div>
       <div class="card-footer">
-        <el-button type="success" size="small" auto @click="changeremark">修改</el-button>
+        <el-button type="success" size="small" auto @click="changeRemark">修改</el-button>
       </div>
     </div>
   </div>
@@ -33,23 +33,18 @@
 import {
   getUserInfoAPI,
   delAccountAPI,
-  remarkupdateAPI,
-  WSCKLoginAPI,
-  WSCKDelaccountAPI,
-  remarkupdateWSCKAPI
-} from '@/api/index'
+  remarkupdateAPI
+} from '@/api'
 import {onMounted, reactive, toRefs} from 'vue'
-import {useRouter, useRoute} from 'vue-router'
+import {useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 
 export default {
   setup() {
     const router = useRouter()
-    const route = useRoute()
 
     let data = reactive({
       remark: '',
-      jdwsck: undefined,
       nickName: undefined,
       timestamp: undefined,
       userStatus: undefined,
@@ -107,7 +102,7 @@ export default {
       }
     }
 
-    const changeremark = async () => {
+    const changeRemark = async () => {
       const eid = localStorage.getItem('eid')
       const wseid = localStorage.getItem('wseid')
       const remark = data.remark
@@ -129,56 +124,12 @@ export default {
       }
     }
 
-    const WSCKLogin = async () => {
-      const wskey =
-          data.jdwsck.match(/wskey=(.*?);/) &&
-          data.jdwsck.match(/wskey=(.*?);/)[1]
-      const pin =
-          data.jdwsck.match(/pin=(.*?);/) &&
-          data.jdwsck.match(/pin=(.*?);/)[1]
-      if (wskey && pin) {
-        const body = await WSCKLoginAPI({wskey: wskey, pin: pin})
-        if (body.data.wseid) {
-          localStorage.setItem('wseid', body.data.wseid)
-          ElMessage.success(body.message)
-        } else {
-          ElMessage.error(body.message || 'wskey 解析失败，请检查后重试！')
-        }
-      } else {
-        ElMessage.error('wskey 解析失败，请检查后重试！')
-      }
-    }
-
-    const delWSCKAccount = async () => {
-      const wseid = localStorage.getItem('wseid')
-      const body = await WSCKDelaccountAPI({wseid})
-      if (body.code !== 200) {
-        ElMessage.error(body.message)
-      } else {
-        ElMessage.success(body.message)
-        setTimeout(() => {
-          logout()
-        }, 1000)
-      }
-    }
-
-    const openUrlWithJD = (url) => {
-      const params = encodeURIComponent(
-          `{"category":"jump","des":"m","action":"to","url":"${url}"}`
-      )
-      window.location.href = `openapp.jdmobile://virtual?params=${params}`
-      console.log(window.location.href)
-    }
-
     return {
       ...toRefs(data),
       getInfo,
       logout,
       delAccount,
-      changeremark,
-      WSCKLogin,
-      delWSCKAccount,
-      openUrlWithJD,
+      changeRemark
     }
   },
 }

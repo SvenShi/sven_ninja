@@ -16,7 +16,7 @@
     </div>
 
 
-    <div v-if="showCK" class="card">
+    <div class="card">
       <div class="card-header">
         <div class="flex items-center justify-between">
           <p class="card-title">CK 登录</p>
@@ -47,39 +47,27 @@
 
 <script>
 import {onMounted, reactive, toRefs} from 'vue'
-import {useRouter, useRoute} from 'vue-router'
+import {useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox} from 'element-plus'
 import {
   getInfoAPI,
-  getQrcodeAPI,
   CKLoginAPI,
-  checkLoginAPI,
-  WSCKLoginAPI,
-} from '@/api/index'
+  checkLoginAPI
+} from '@/api'
 
 export default {
   setup() {
     const router = useRouter()
-    const route = useRoute()
 
     let data = reactive({
       marginCount: 0,
       allowAdd: true,
       cookie: '',
-      QRCode: undefined,
-      qrCodeVisibility: false,
       token: undefined,
       okl_token: undefined,
       cookies: undefined,
       timer: undefined,
       waitLogin: false,
-      //
-      marginWSCKCount: 0,
-      allowWSCKAdd: true,
-      jdwsck: undefined,
-      showQR: false,
-      showWSCK: false,
-      showCK: true,
       nickName: undefined,
 
     })
@@ -94,40 +82,6 @@ export default {
       data.showWSCK = info.showWSCK
       data.showCK = info.showCK
 
-    }
-
-    const getQrcode = async () => {
-      // 增加扫码是否禁用判断
-      if (this.showQR) {
-        try {
-          const body = await getQrcodeAPI()
-          data.token = body.data.token
-          data.okl_token = body.data.okl_token
-          data.cookies = body.data.cookies
-          data.QRCode = body.data.QRCode
-          if (data.QRCode) {
-            // data.qrCodeVisibility = true
-            data.waitLogin = true
-            clearInterval(data.timer) // 清除定时器
-            data.timer = setInterval(ckeckLogin, 3000) // 设置定时器
-          }
-        } catch (e) {
-          console.error(e)
-          ElMessage.error('生成二维码失败！请重试或放弃')
-        }
-      } else {
-        ElMessage.warning('扫码已禁用请手动抓包')
-      }
-
-    }
-
-    const showQrcode = async () => {
-      data.qrCodeVisibility = true
-    }
-
-    const jumpLogin = async () => {
-      const href = `openapp.jdmobile://virtual/ad?params={"category":"jump","des":"ThirdPartyLogin","action":"to","onekeylogin":"return","url":"https://plogin.m.jd.com/cgi-bin/m/tmauth?appid=300&client_type=m&token=${data.token}","authlogin_returnurl":"weixin://","browserlogin_fromurl":"${window.location.host}"}`
-      window.location.href = href
     }
 
     const ckeckLogin = async () => {
@@ -198,42 +152,16 @@ export default {
       }
     }
 
-    // 新增 wskey登录
-    const WSCKLogin = async () => {
-      const wskey =
-          data.jdwsck.match(/wskey=(.*?);/) &&
-          data.jdwsck.match(/wskey=(.*?);/)[1]
-      const pin =
-          data.jdwsck.match(/pin=(.*?);/) &&
-          data.jdwsck.match(/pin=(.*?);/)[1]
-      if (wskey && pin) {
-        const body = await WSCKLoginAPI({wskey: wskey, pin: pin})
-        if (body.data.wseid) {
-          localStorage.setItem('wseid', body.data.wseid)
-          ElMessage.success(body.message)
-          router.push('/')
-        } else {
-          ElMessage.error(body.message || 'wskey 解析失败，请检查后重试！')
-        }
-      } else {
-        ElMessage.error('wskey 解析失败，请检查后重试！')
-      }
-    }
 
     onMounted(() => {
       getInfo()
-      getQrcode()
     })
 
     return {
       ...toRefs(data),
       getInfo,
-      getQrcode,
-      showQrcode,
       ckeckLogin,
-      jumpLogin,
-      CKLogin,
-      WSCKLogin,
+      CKLogin
     }
   },
 }
