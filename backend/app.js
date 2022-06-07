@@ -6,6 +6,7 @@ const Router = require('@koa/router');
 const body = require('koa-body');
 const serve = require('koa-static');
 const User = require('./user');
+const Content = require('./Content')
 const packageJson = require('./package.json');
 
 // Create express instance
@@ -43,7 +44,6 @@ router.get('/api/status', (ctx) => {
 
 router.get('/api/info', async (ctx) => {
     const data = await User.getPoolInfo();
-    debugger
     ctx.body = {data};
 });
 
@@ -96,6 +96,7 @@ router.post('/api/disable', body(), async (ctx) => {
     ctx.body = {data};
 });
 
+
 router.post('/api/enable', body(), async (ctx) => {
     const body = ctx.request.body;
     const eid = body.eid;
@@ -103,6 +104,34 @@ router.post('/api/enable', body(), async (ctx) => {
     const data = await user.enableEnv();
     ctx.body = {data};
 });
+
+router.post('/api/verifyToken', body(), async (ctx) => {
+    const body = ctx.request.body;
+    const token = body.token;
+    const user = new User({token});
+    const data = await user.verifyToken();
+    ctx.body = {data};
+});
+
+
+router.get('/api/getContent', async (ctx) => {
+    const query = ctx.query;
+    const fileName = query.contentName;
+    const content = new Content({fileName});
+    const data = await content.readFile();
+    ctx.body = {data};
+});
+
+
+router.post('/api/setContent', body(), async (ctx) => {
+    const body = ctx.request.body;
+    const fileName = body.contentName;
+    const fileContent = body.content;
+    const content = new Content({fileName,fileContent});
+    const data = await content.writFile();
+    ctx.body = {data};
+});
+
 
 
 const port = process.env.NINJA_PORT || 5701;

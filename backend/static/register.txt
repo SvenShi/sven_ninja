@@ -1,0 +1,8 @@
+<p>安卓手机傻瓜式获取CK（强烈推荐，非常方便）<a style="" href="https://github.com/ZhuSky/JDCookie" target="_blank">点此访问下载连接</a></p>
+<p>电脑用户浏览器登录<a style="" href="https://m.jd.com/" target="_blank">JD官网</a>，点击我的出现登录页面后点击F12，通过开发者工具获取cookie。</p>
+<p>手机用户可以使用Alook浏览器登录<a style="" href="https://m.jd.com/" target="_blank" id="jd">JD官网</a>，并在菜单-工具箱-开发者工具-Cookies中获取（Android和iPhone通用）。</p>
+<p>另外也可以使用抓包工具（iPhone：Stream，Android：HttpCanary）抓取京东app的ck</p>
+<p>注册成功后使用用户名即可登录</p>
+<span class="card-subtitle" style="color: red"> 可以直接填写整个cookie。</span><br/>
+<span class="card-subtitle" style="color: red"> 注意格式（pt_key=xxxxxxxxxxxxxxx;pt_pin=xxxxxxxxxxxxxx;）注意分号不能少！</span><br/>
+<span class="card-subtitle"> 请在下方输入您的 cookie 注册。</span><br/>

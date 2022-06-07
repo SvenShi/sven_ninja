@@ -21,6 +21,15 @@ async function getToken() {
     return body.data.token;
 }
 
+module.exports.getToken = async() =>{
+    const body = await api({
+        url: 'open/auth/token', searchParams: {
+            client_id: qlClient.clientId, client_secret: qlClient.clientSecret,
+        }
+    }).json();
+    return body.data.token;
+}
+
 module.exports.getEnvs = async () => {
     const token = await getToken();
     const body = await api({

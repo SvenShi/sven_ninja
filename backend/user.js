@@ -1,36 +1,71 @@
 /* eslint-disable camelcase */
 'use strict';
 require('dotenv').config();
+
 const {
-    addEnv, delEnv, getEnvs, getEnvsCount, updateEnv, disable, enable
+    addEnv, delEnv, getEnvs, getEnvsCount, updateEnv, disable, enable, getToken
 } = require('./ql');
+
+const adminAcct = {
+    username: process.env.ADMIN_USERNAME,
+    password: process.env.ADMIN_PASSWORD
+}
+const allowAdmin = process.env.ALLOW_ADMIN
+
+let staticToken;
 
 module.exports = class User {
     ptKey;
     ptPin;
     eid;
     username;
+    password;
+    token;
     ck;
 
     constructor({
-                    ptKey, ptPin, eid, username, ck
+                    ptKey, ptPin, eid, username, ck, password, token
                 }) {
         this.ptKey = ptKey
         this.ptPin = ptPin
+        this.password = password
         if (ptKey && ptPin) {
             this.cookie = 'pt_key=' + this.ptKey + ';pt_pin=' + this.ptPin + ';';
         }
         this.eid = Number(eid)
         this.username = username
+        this.token = token
         this.ck = ck
     }
 
     async login() {
+        if (this.username === adminAcct.username) {
+            if (allowAdmin === 'true') {
+                //管理员登录
+                if (this.password) {
+                    if (this.password === adminAcct.password) {
+                        staticToken = await getToken()
+                        return {
+                            errCode: 0, username: adminAcct.username, eid: 0, token: staticToken
+                        };
+                    }
+                } else {
+                    return {
+                        errCode: 1, username: adminAcct.username
+                    };
+                }
+            }else {
+                return {
+                    errCode: 2, username: adminAcct.username
+                };
+            }
+        }
+
         const envs = await getEnvs();
         const env = await envs.find(item => item.remarks === this.username);
         if (env) {
             return {
-                errCode: 0, username: env.remarks, eid: env.id, timestamp: env.timestamp,
+                errCode: 0, username: env.remarks, eid: env.id, timestamp: env.timestamp
             };
         } else {
             return {
@@ -39,7 +74,18 @@ module.exports = class User {
         }
     }
 
+    async verifyToken() {
+        let code = this.token === staticToken ? 200 : 444;
+        staticToken = '';
+        return {code}
+    }
+
     async register() {
+        if (this.username === adminAcct.username) {
+            return {
+                username: this.username, errCode: 201
+            };
+        }
 
         const envs = await getEnvs();
         const poolInfo = await User.getPoolInfo();

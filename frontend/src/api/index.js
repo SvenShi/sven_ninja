@@ -16,6 +16,18 @@ export function registerUser(body) {
     return api.post('register', {json: body}).json()
 }
 
+export function verifyToken() {
+    const token = localStorage.getItem('token')
+    if (!token){
+        return {
+            data:{
+                code:444
+            }
+        };
+    }
+    return api.post('verifyToken', {json: {token}}).json()
+}
+
 
 export function getUserInfoAPI(eid) {
     const searchParams = new URLSearchParams()
@@ -37,5 +49,15 @@ export function disableAPI(body) {
 
 export function enableAPI(body) {
     return api.post('enable', {json: body}).json()
+}
+
+export function getContent(contentName) {
+    const searchParams = new URLSearchParams()
+    searchParams.set('contentName', contentName)
+    return api.get('getContent', {searchParams: searchParams}).json()
+}
+
+export function setContent(body) {
+    return api.post('setContent', {json: body}).json()
 }
 

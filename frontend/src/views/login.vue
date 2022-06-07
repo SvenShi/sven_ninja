@@ -6,11 +6,7 @@
           <p class="card-title">Ninja提醒您</p>
         </div>
       </div>
-      <div class="card-body text-base leading-6">
-        <p style="color: red">撸豆有可能造成的任何损失本人概不负责！！！！！！！！！</p>
-        <p>为了您的财产安全请关闭免密支付以及打开支付验密（京东-设置-支付设置-支付验密设置）。</p>
-        <p>建议京东账户绑定微信以保证提现能到账。</p>
-        <p style="font-weight: bold;">安全起见，切勿泄露您的cookie！</p>
+      <div class="card-body text-base leading-6" v-html="tipContent">
       </div>
       <div class="card-footet"></div>
     </div>
@@ -20,11 +16,18 @@
         <div class="flex items-center justify-between">
           <p class="card-title">登录</p>
         </div>
+        <div class="card-body text-base leading-6" v-html="loginContent">
+        </div>
       </div>
       <div style="padding: 30px">
         <el-form :model="userInfo" label-width="30%" size="small">
           <el-form-item label="用户名" prop="username">
-            <el-input v-model="userInfo.username" style="width: 50%;margin-left: 20px"/>
+            <el-input v-model="userInfo.username" @keyup.enter="loginUser"
+                      style="width: 50%;margin-left: 20px;min-width: 200px"/>
+          </el-form-item>
+          <el-form-item v-if="isAdmin" label="密码" prop="password">
+            <el-input v-model="userInfo.password" type="password" @keyup.enter="loginUser"
+                      style="width: 50%;margin-left: 20px;min-width: 200px"/>
           </el-form-item>
           <el-form-item style="text-align: center;" label-width="0px">
             <el-button type="primary" :disabled="!userInfo.username" size="small" @click="loginUser">登录</el-button>
@@ -41,62 +44,100 @@
           <p class="card-title">注册</p>
           <span class="ml-2 px-2 py-1 bg-gray-200 rounded-full font-normal text-xs">余量：{{ marginCount }}</span>
         </div>
-        <div class="card-body text-base leading-6">
-          <p>安卓手机傻瓜式获取CK（强烈推荐，非常方便）<a style="" href="https://github.com/ZhuSky/JDCookie" target="_blank">点此访问下载连接</a></p>
-          <p>电脑用户浏览器登录<a style="" href="https://m.jd.com/" target="_blank">JD官网</a>，点击我的出现登录页面后点击F12，通过开发者工具获取cookie。</p>
-          <p>手机用户可以使用Alook浏览器登录<a style="" href="https://m.jd.com/" target="_blank" id="jd">JD官网</a>，并在菜单-工具箱-开发者工具-Cookies中获取（Android和iPhone通用）。</p>
-          <p>另外也可以使用抓包工具（iPhone：Stream，Android：HttpCanary）抓取京东app的ck</p>
-          <p>cookie直接填入输入框即可，Ninja会自动正则提取pt_key和pt_pin。</p>
-          <span class="card-subtitle" style="color: red"> 可以直接填写整个cookie。</span><br/>
-          <span class="card-subtitle" style="color: red"> 注意格式（pt_key=xxxxxxxxxxxxxxx;pt_pin=xxxxxxxxxxxxxx;）注意分号不能少！</span><br/>
-          <span class="card-subtitle"> 请在下方输入您的 cookie 注册。</span><br/>
+        <div class="card-body text-base leading-6" v-html="registerContent">
         </div>
       </div>
       <div style="padding: 30px">
-        <el-form :model="userInfo" :rules="registerRules" size="small" label-width="30%">
+        <el-form ref="registerForm" :model="userInfo" :rules="registerRules" size="small" label-width="30%">
           <el-form-item label="用户名" prop="username">
-            <el-input v-model="userInfo.username" style="width: 50%;margin-left: 20px"></el-input>
+            <el-input v-model="userInfo.username" @keyup.enter="registerConfirm(registerForm)"
+                      style="width: 50%;margin-left: 20px;min-width: 200px"></el-input>
           </el-form-item>
           <el-form-item label="Cookie" prop="cookie">
-            <el-input v-model="userInfo.cookie" style="width: 70%;margin-left: 20px"></el-input>
+            <el-input v-model="userInfo.cookie" @keyup.enter="registerConfirm(registerForm)"
+                      style="width: 70%;margin-left: 20px;min-width: 200px"></el-input>
           </el-form-item>
           <el-form-item style="text-align: center;" label-width="0px">
-            <el-button type="primary" @click="registerConfirm" size="small">确定</el-button>
+            <el-button type="primary" @click="registerConfirm(registerForm)" size="small">确定</el-button>
             <el-button @click="registerCancel" size="small">返回</el-button>
           </el-form-item>
         </el-form>
       </div>
     </div>
+    <div style="text-align: left;margin-top:5px">
+      <el-link type="info" href="javascript:;" @click="updateLogClick" >更新日志</el-link>
+    </div>
 
+
+    <el-dialog
+        v-model="dialogVisible"
+        title="更新内容"
+        width="35%"
+        @close="handleClose"
+    >
+      <div>
+        <p>
+          环境变量配置在.env文件中
+        </p>
+        <p>
+          1.添加管理功能，在环境变量中配置 ALLOW_ADMIN=true 即可开启管理功能，默认关闭
+        </p>
+        <p>
+          2.开启管理功能后,按照环境变量中配置的管理员账号密码登录即可进入管理页面
+        </p>
+        <p>
+          3.管理页面添加自定义标语功能 仅支持HTML
+        </p>
+        <p>
+          4.修复一些小问题，修改提示信息。
+        </p>
+        <el-link type="primary" href="https://github.com/sw-ashai/ashai_ninja" target="_blank" >项目地址</el-link>
+      </div>
+      <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogVisible = false" size="small">关闭</el-button>
+        <el-button type="primary" @click="dialogVisible = false" size="small">确定</el-button>
+      </span>
+      </template>
+    </el-dialog>
 
   </div>
 </template>
 
 <script>
-import {onMounted, reactive, toRefs} from 'vue'
+import {onMounted, reactive, toRefs, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {ElMessage} from 'element-plus'
 import {
   getInfoAPI,
   login,
-  registerUser
+  registerUser,
+  getContent
 } from '@/api'
 
 export default {
   setup() {
     const router = useRouter()
+    const registerForm = ref('')
 
     let data = reactive({
+      version: '1.1',
+      dialogVisible: false,
+      tipContent: '',
+      loginContent: '',
+      registerContent: '',
       marginCount: 0,
       allowAdd: true,
       showRegister: false,
       showLogin: true,
       userInfo: {
         username: undefined,
+        password: '',
         cookie: '',
         ptKey: '',
         ptPin: ''
       },
+      isAdmin: false,
       registerRules: {
         username: [
           {required: true, message: "请输入用户名", trigger: 'blur'}
@@ -114,18 +155,39 @@ export default {
     }
 
     const loginUser = async () => {
-      const res = (await login(data.userInfo)).data
-      if (res.errCode === 0) {
-        //成功
-        localStorage.setItem('eid', res.eid)
-        router.push("/")
+      if (data.isAdmin) {
+        if (!data.userInfo.password) {
+          ElMessage.error('请输入密码')
+        }
+      }
+      if (data.userInfo.username) {
+        const res = (await login(data.userInfo)).data
+        if (res.errCode === 0) {
+          //成功
+          localStorage.setItem('eid', res.eid)
+          if (res.eid === 0) {
+            localStorage.setItem('token', res.token)
+            router.push("/manage")
+          } else {
+            router.push("/")
+          }
+        } else {
+          if (res.errCode === 1) {
+            //管理员登录
+            data.isAdmin = true
+          }
+          if (res.errCode === 2) {
+            ElMessage.error('该账号未启用，禁止登录')
+          }
+          if (res.errCode === 404) {
+            ElMessage.error('未注册的用户')
+          }
+          if (res.errCode === 500) {
+            ElMessage.error('未知错误')
+          }
+        }
       } else {
-        if (res.errCode === 404) {
-          ElMessage.error('未注册的用户')
-        }
-        if (res.errCode === 500) {
-          ElMessage.error('未知错误')
-        }
+        ElMessage.error('请输入用户名')
       }
     }
 
@@ -134,34 +196,41 @@ export default {
       data.showRegister = true
     }
 
-    const registerConfirm = async () => {
-      const ptKey =
-          data.userInfo.cookie.match(/pt_key=(.*?);/) &&
-          data.userInfo.cookie.match(/pt_key=(.*?);/)[1]
-      const ptPin =
-          data.userInfo.cookie.match(/pt_pin=(.*?);/) &&
-          data.userInfo.cookie.match(/pt_pin=(.*?);/)[1]
-      if (ptKey && ptPin) {
-        data.userInfo.ptKey = ptKey
-        data.userInfo.ptPin = ptPin
-      } else {
-        ElMessage.error('cookie 解析失败，请检查后重试！')
+    const registerConfirm = async (formEl) => {
+      if (!formEl) {
         return
       }
+      formEl.validate(async (valid) => {
+        if (valid) {
+          const ptKey =
+              data.userInfo.cookie.match(/pt_key=(.*?);/) &&
+              data.userInfo.cookie.match(/pt_key=(.*?);/)[1]
+          const ptPin =
+              data.userInfo.cookie.match(/pt_pin=(.*?);/) &&
+              data.userInfo.cookie.match(/pt_pin=(.*?);/)[1]
+          if (ptKey && ptPin) {
+            data.userInfo.ptKey = ptKey
+            data.userInfo.ptPin = ptPin
+          } else {
+            ElMessage.error('cookie 解析失败，请检查后重试！')
+            return
+          }
 
-      const res = (await registerUser(data.userInfo)).data
-      if (res.errCode === 0) {
-        ElMessage.success(res.msg)
-        data.showLogin = true
-        data.showRegister = false
-      } else {
-        if (res.errCode === 201) {
-          ElMessage.error('用户名重复')
+          const res = (await registerUser(data.userInfo)).data
+          if (res.errCode === 0) {
+            ElMessage.success(res.msg)
+            data.showLogin = true
+            data.showRegister = false
+          } else {
+            if (res.errCode === 201) {
+              ElMessage.error('用户名重复')
+            }
+            if (res.errCode === 500) {
+              ElMessage.error('未知错误')
+            }
+          }
         }
-        if (res.errCode === 500) {
-          ElMessage.error('未知错误')
-        }
-      }
+      })
     }
 
     const registerCancel = async () => {
@@ -169,13 +238,41 @@ export default {
       data.showRegister = false
     }
 
+    const initContent = async () => {
+      data.tipContent = (await getContent('tip')).data.content
+      data.loginContent = (await getContent('login')).data.content
+      data.registerContent = (await getContent('register')).data.content
+    }
+
+
+    const handleClose = function () {
+      localStorage.setItem("version", data.version)
+    }
+    const updateLogClick = function () {
+      data.dialogVisible = true;
+      return false;
+    }
+
+    const verifyVersion = function () {
+      const version = localStorage.getItem('version')
+      if (version !== data.version) {
+        data.dialogVisible = true;
+        return false
+      }
+      return true
+    }
+
     onMounted(() => {
+      let flag = verifyVersion()
       const eid = localStorage.getItem('eid')
-      if (eid){
-        router.push("/")
-      }else {
+      if (eid !== '0' && eid) {
+        if (flag){
+          router.push("/")
+        }
+      } else {
         getInfo()
       }
+      initContent()
     })
 
     return {
@@ -184,7 +281,10 @@ export default {
       loginUser,
       registerConfirm,
       registerCancel,
-      openRegister
+      openRegister,
+      registerForm,
+      updateLogClick,
+      handleClose
     }
   },
 }
@@ -193,16 +293,16 @@ export default {
 <style scoped>
 /*没被访问过之前*/
 a:link {
-  color: #B321FF;
+  color: #003fff;
 }
 
 /*默认*/
 a {
-  color: #EECDFF;
+  color: #003fff;
 }
 
 /*鼠标掠过*/
 a:hover {
-  color: red;
+  color: #4f6fff;
 }
 </style>
