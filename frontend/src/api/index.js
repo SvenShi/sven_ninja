@@ -12,6 +12,7 @@ export function login(body) {
     return api.post('login', {json: body}).json()
 }
 
+
 export function registerUser(body) {
     return api.post('register', {json: body}).json()
 }

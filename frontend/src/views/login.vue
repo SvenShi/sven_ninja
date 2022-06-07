@@ -149,9 +149,13 @@ export default {
     })
 
     const getInfo = async () => {
-      const info = (await getInfoAPI()).data
-      data.marginCount = info.marginCount
-      data.allowAdd = info.allowAdd
+      const info = (await getInfoAPI())
+      if (info.code === 400){
+        ElMessage.error(info.message)
+        return
+      }
+      data.marginCount = info.data.marginCount
+      data.allowAdd = info.data.allowAdd
     }
 
     const loginUser = async () => {
@@ -161,7 +165,12 @@ export default {
         }
       }
       if (data.userInfo.username) {
-        const res = (await login(data.userInfo)).data
+        const resData = (await login(data.userInfo))
+        if (resData.code === 400){
+          ElMessage.error(resData.message)
+          return
+        }
+        let res = resData.data
         if (res.errCode === 0) {
           //成功
           localStorage.setItem('eid', res.eid)
@@ -216,7 +225,12 @@ export default {
             return
           }
 
-          const res = (await registerUser(data.userInfo)).data
+          const resData = (await registerUser(data.userInfo))
+          if (resData.code === 400){
+            ElMessage.error(resData.message)
+            return
+          }
+          const res = resData.data
           if (res.errCode === 0) {
             ElMessage.success(res.msg)
             data.showLogin = true

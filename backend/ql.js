@@ -3,7 +3,7 @@ const got = require('got');
 require('dotenv').config();
 
 const api = got.extend({
-    prefixUrl: process.env.QL_URL || 'http://localhost:5600/',
+    prefixUrl: process.env.QL_URL || 'http://localhost:5700/',
     retry: {limit: 0},
 });
 
@@ -18,15 +18,21 @@ async function getToken() {
             client_id: qlClient.clientId, client_secret: qlClient.clientSecret,
         }
     }).json();
+    if (body.code !== 200) {
+        throw new QLError("青龙令牌配置错误，请检查.env文件配置是否正确！", 400, 400)
+    }
     return body.data.token;
 }
 
-module.exports.getToken = async() =>{
+module.exports.getToken = async () => {
     const body = await api({
         url: 'open/auth/token', searchParams: {
             client_id: qlClient.clientId, client_secret: qlClient.clientSecret,
         }
     }).json();
+    if (body.code !== 200) {
+        throw new QLError("青龙令牌配置错误，请检查.env文件配置是否正确！", 400, 400)
+    }
     return body.data.token;
 }
 
@@ -109,3 +115,12 @@ module.exports.enable = async (eid) => {
     }).json();
     return body;
 };
+
+class QLError extends Error {
+    constructor(message, status, statusCode) {
+        super(message);
+        this.name = 'QLError';
+        this.status = status;
+        this.statusCode = statusCode || 500;
+    }
+}

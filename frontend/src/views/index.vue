@@ -85,6 +85,10 @@ export default {
       }
       if (eid) {
         const userInfo = await getUserInfoAPI(eid)
+        if (userInfo.code === 400){
+          ElMessage.error(userInfo.message)
+          return
+        }
         if (!userInfo) {
           ElMessage.error('获取用户CK信息失败，请重新登录')
           logout()

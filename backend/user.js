@@ -7,8 +7,7 @@ const {
 } = require('./ql');
 
 const adminAcct = {
-    username: process.env.ADMIN_USERNAME,
-    password: process.env.ADMIN_PASSWORD
+    username: process.env.ADMIN_USERNAME, password: process.env.ADMIN_PASSWORD
 }
 const allowAdmin = process.env.ALLOW_ADMIN
 
@@ -54,7 +53,7 @@ module.exports = class User {
                         errCode: 1, username: adminAcct.username
                     };
                 }
-            }else {
+            } else {
                 return {
                     errCode: 2, username: adminAcct.username
                 };
@@ -129,7 +128,7 @@ module.exports = class User {
         this.timestamp = env.timestamp;
         this.username = env.remarks
         return {
-            username: this.username, eid: this.eid, timestamp: this.timestamp, status: env.status
+            username: this.username, eid: this.eid, timestamp: this.timestamp, status: env.status,code:200
         };
     }
 
@@ -201,7 +200,7 @@ module.exports = class User {
         const allowCount = (process.env.ALLOW_NUM || 40) - count;
 
         return {
-            marginCount: allowCount >= 0 ? allowCount : 0, allowAdd: Boolean(process.env.ALLOW_ADD) || false,
+            marginCount: allowCount >= 0 ? allowCount : 0, allowAdd: Boolean(process.env.ALLOW_ADD) || false, code: 200
         };
     }
 };
