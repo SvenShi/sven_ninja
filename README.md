@@ -100,7 +100,7 @@ Ninja 仅供学习参考使用，请于下载后的 24 小时内删除，本人�
    git clone https://github.com/sw-ashai/ashai_ninja.git /ql/ninja
    cd /ql/ninja/backend
    pnpm install
-   cp .env.example .env # 如有需要, 修改.env
+   cp .env.example .env # 注意需要修改.env
    pm2 start
    ```
 
@@ -171,8 +171,6 @@ pm2 start
 - 重启后务必执行一次 `ql extra` 保证 Ninja 配置成功。
 
 - 更新 Ninja 只需要在**容器**中 `ninja/backend` 目录执行 `git pull` 然后 `pm2 start`
-
-- Qinglong 需要在登录状态（`auth.json` 中有 token）
 
 ## 如何更新Ninja
 
