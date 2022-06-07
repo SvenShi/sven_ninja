@@ -133,8 +133,10 @@ node app.js
 在 `.env` 文件中添加以下内容：
 
 ```bash
-QL_DIR=qinglong 容器的本地路径
 QL_URL=http://localhost:5700
+#青龙授权令牌 在青龙容器设置中获取
+CLIENT_ID=***********
+CLIENT_SECRET=********
 ```
 
 `node app.js` 想要在后台运行可以使用 `&` `nohup` `screen` 等命令。
