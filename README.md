@@ -160,6 +160,7 @@ cd /ql/ninja
 git checkout .
 git pull
 cd backend
+pnpm install
 pm2 start
 ```
 
