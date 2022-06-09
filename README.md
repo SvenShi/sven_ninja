@@ -133,6 +133,7 @@ CLIENT_SECRET=********
 - `ALLOW_ADMIN`: 是否开启管理员账号（默认 `false`，`true`开启）
 - `ADMIN_USERNAME`: 管理员账号（默认 `admin`） 
 - `ADMIN_PASSWORD`: 管理员密码（默认 `123456`）
+- `USERNAME_SALT`: 用户名加密密钥，强烈建议修改 可以随意填写任何内容但是长度必须为8的倍数 8 16 24 32 系统将根据该值来对用户名进行加密
 
 配置方式：
 
