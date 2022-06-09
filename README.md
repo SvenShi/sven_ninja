@@ -118,9 +118,14 @@ node app.js
 
 ```bash
 QL_URL=http://localhost:5700
+```
+在 `.env` 文件中修改以下内容：
+```
 #青龙授权令牌 在青龙容器设置中获取
 CLIENT_ID=***********
 CLIENT_SECRET=********
+#用户名加密密钥，强烈建议修改 可以随意填写任何内容但是长度必须为8的倍数 8 16 24 32 系统将根据该值来对用户名进行加密
+USERNAME_SALT:ninja123
 ```
 
 `node app.js` 想要在后台运行可以使用 `&` `nohup` `screen` 等命令。
