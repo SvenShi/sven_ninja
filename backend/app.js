@@ -21,7 +21,6 @@ const handler = async (ctx, next) => {
             ctx.body.data.message = undefined;
         }
     } catch (err) {
-        console.log(err);
         ctx.status = 200;
         ctx.body = {
             code: err.status || err.statusCode || 500, message: err.message,
@@ -113,6 +112,15 @@ router.post('/api/verifyToken', body(), async (ctx) => {
     ctx.body = {data};
 });
 
+router.post('/api/verifyUser', body(), async (ctx) => {
+    const body = ctx.request.body;
+    const encryptUsername = body.encryptUsername;
+    const eid = body.eid;
+    const user = new User({encryptUsername,eid});
+    const data = await user.verifyUser();
+    ctx.body = {data};
+});
+
 
 router.get('/api/getContent', async (ctx) => {
     const query = ctx.query;
@@ -127,11 +135,10 @@ router.post('/api/setContent', body(), async (ctx) => {
     const body = ctx.request.body;
     const fileName = body.contentName;
     const fileContent = body.content;
-    const content = new Content({fileName,fileContent});
+    const content = new Content({fileName, fileContent});
     const data = await content.writFile();
     ctx.body = {data};
 });
-
 
 
 const port = process.env.NINJA_PORT || 5701;

@@ -3,10 +3,12 @@
   <div class="main">
     <router-view />
   </div>
+  <update-log/>
 </template>
 
 <script setup>
 import Header from './components/Header.vue'
+import UpdateLog from './components/updateLog.vue'
 
 // This starter template is using Vue 3 experimental <script setup> SFCs
 // Check out https://github.com/vuejs/rfcs/blob/script-setup-2/active-rfcs/0000-script-setup.md

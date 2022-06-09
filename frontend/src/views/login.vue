@@ -64,43 +64,6 @@
         </el-form>
       </div>
     </div>
-    <div style="text-align: left;margin-top:5px">
-      <el-link type="info" href="javascript:;" @click="updateLogClick" >更新日志</el-link>
-    </div>
-
-
-    <el-dialog
-        v-model="dialogVisible"
-        title="更新内容"
-        width="35%"
-        @close="handleClose"
-    >
-      <div>
-        <p>
-          环境变量配置在.env文件中
-        </p>
-        <p>
-          1.添加管理功能，在环境变量中配置 ALLOW_ADMIN=true 即可开启管理功能，默认关闭
-        </p>
-        <p>
-          2.开启管理功能后,按照环境变量中配置的管理员账号密码登录即可进入管理页面
-        </p>
-        <p>
-          3.管理页面添加自定义标语功能 仅支持HTML
-        </p>
-        <p>
-          4.修复一些小问题，修改提示信息。
-        </p>
-        <el-link type="primary" href="https://github.com/sw-ashai/ashai_ninja" target="_blank" >项目地址</el-link>
-      </div>
-      <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="dialogVisible = false" size="small">关闭</el-button>
-        <el-button type="primary" @click="dialogVisible = false" size="small">确定</el-button>
-      </span>
-      </template>
-    </el-dialog>
-
   </div>
 </template>
 
@@ -121,7 +84,6 @@ export default {
     const registerForm = ref('')
 
     let data = reactive({
-      version: '1.1',
       dialogVisible: false,
       tipContent: '',
       loginContent: '',
@@ -174,6 +136,7 @@ export default {
         if (res.errCode === 0) {
           //成功
           localStorage.setItem('eid', res.eid)
+          localStorage.setItem('encryptUsername', res.encryptUsername)
           if (res.eid === 0) {
             localStorage.setItem('token', res.token)
             router.push("/manage")
@@ -258,26 +221,7 @@ export default {
       data.registerContent = (await getContent('register')).data.content
     }
 
-
-    const handleClose = function () {
-      localStorage.setItem("version", data.version)
-    }
-    const updateLogClick = function () {
-      data.dialogVisible = true;
-      return false;
-    }
-
-    const verifyVersion = function () {
-      const version = localStorage.getItem('version')
-      if (version !== data.version) {
-        data.dialogVisible = true;
-        return false
-      }
-      return true
-    }
-
     onMounted(() => {
-      let flag = verifyVersion()
       const eid = localStorage.getItem('eid')
       if (eid !== '0' && eid) {
         if (flag){
@@ -296,9 +240,7 @@ export default {
       registerConfirm,
       registerCancel,
       openRegister,
-      registerForm,
-      updateLogClick,
-      handleClose
+      registerForm
     }
   },
 }

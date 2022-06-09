@@ -27,7 +27,8 @@
       <div class="card-body text-base leading-6" v-html="usernameContent">
       </div>
       <div class="card-body text-center">
-        <el-input v-model="username" style="min-width: 200px" @keyup.enter="updateUsername" size="small" clearable class="my-4 w-full"/>
+        <el-input v-model="username" style="min-width: 200px" @keyup.enter="updateUsername" size="small" clearable
+                  class="my-4 w-full"/>
       </div>
       <div class="card-footer">
         <el-button type="success" size="small" auto @click="updateUsername">修改</el-button>
@@ -41,7 +42,8 @@
       <div class="card-body text-base leading-6" v-html="cookieContent">
       </div>
       <div class="card-body text-center">
-        <el-input v-model="cookie" style="min-width: 300px" @keyup.enter="updateCookie" size="small" clearable class="my-4 w-full"/>
+        <el-input v-model="cookie" style="min-width: 300px" @keyup.enter="updateCookie" size="small" clearable
+                  class="my-4 w-full"/>
       </div>
       <div class="card-footer">
         <el-button type="success" size="small" auto @click="updateCookie">更新</el-button>
@@ -56,7 +58,7 @@ import {
   delAccountAPI,
   updateAPI,
   disableAPI,
-  enableAPI, getContent
+  enableAPI, getContent, verifyUser
 } from '@/api'
 import {onMounted, reactive, toRefs} from 'vue'
 import {useRouter} from 'vue-router'
@@ -66,7 +68,6 @@ export default {
   setup() {
     const router = useRouter()
     let data = reactive({
-      version: '1.1',
       profileContent: '',
       usernameContent: '',
       cookieContent: '',
@@ -83,9 +84,21 @@ export default {
         logout()
         return
       }
+
+      let userRes = await verifyUser()
+      if (userRes.data.code !== 200) {
+        if (userRes.data.code === 555) {
+          ElMessage.error('检查环境变量中配置的密钥长度是否为8的倍数')
+        } else {
+          ElMessage.error('用户信息验证失败')
+        }
+        logout()
+        return
+      }
+
       if (eid) {
         const userInfo = await getUserInfoAPI(eid)
-        if (userInfo.code === 400){
+        if (userInfo.code === 400) {
           ElMessage.error(userInfo.message)
           return
         }
@@ -102,6 +115,7 @@ export default {
 
     const logout = () => {
       localStorage.removeItem('eid')
+      localStorage.removeItem('encryptUsername')
       router.push('/login')
     }
 
@@ -201,17 +215,9 @@ export default {
       data.cookieContent = (await getContent('updateCookie')).data.content
     }
 
-    const verifyVersion = function () {
-      const version = localStorage.getItem('version')
-      if (version !== data.version){
-        router.push('/login')
-      }
-    }
-
     onMounted(() => {
       getInfo()
       initContent()
-      verifyVersion()
     })
 
     return {

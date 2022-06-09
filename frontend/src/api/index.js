@@ -29,6 +29,19 @@ export function verifyToken() {
     return api.post('verifyToken', {json: {token}}).json()
 }
 
+export function verifyUser() {
+    const encryptUsername = localStorage.getItem('encryptUsername')
+    const eid = localStorage.getItem('eid')
+    if (!encryptUsername){
+        return {
+            data:{
+                code:444
+            }
+        };
+    }
+    return api.post('verifyUser', {json: {encryptUsername,eid}}).json()
+}
+
 
 export function getUserInfoAPI(eid) {
     const searchParams = new URLSearchParams()

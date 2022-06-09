@@ -6,6 +6,10 @@ const {
     addEnv, delEnv, getEnvs, getEnvsCount, updateEnv, disable, enable, getToken
 } = require('./ql');
 
+const {
+    encrypt, decrypt
+} = require('./encryptUtil')
+
 const adminAcct = {
     username: process.env.ADMIN_USERNAME, password: process.env.ADMIN_PASSWORD
 }
@@ -21,9 +25,10 @@ module.exports = class User {
     password;
     token;
     ck;
+    encryptUsername
 
     constructor({
-                    ptKey, ptPin, eid, username, ck, password, token
+                    ptKey, ptPin, eid, username, ck, password, token, encryptUsername
                 }) {
         this.ptKey = ptKey
         this.ptPin = ptPin
@@ -35,6 +40,7 @@ module.exports = class User {
         this.username = username
         this.token = token
         this.ck = ck
+        this.encryptUsername = encryptUsername
     }
 
     async login() {
@@ -63,8 +69,9 @@ module.exports = class User {
         const envs = await getEnvs();
         const env = await envs.find(item => item.remarks === this.username);
         if (env) {
+            let encryptUsername = encrypt(this.username)
             return {
-                errCode: 0, username: env.remarks, eid: env.id, timestamp: env.timestamp
+                errCode: 0, username: env.remarks, eid: env.id, timestamp: env.timestamp, encryptUsername
             };
         } else {
             return {
@@ -77,6 +84,25 @@ module.exports = class User {
         let code = this.token === staticToken ? 200 : 444;
         staticToken = '';
         return {code}
+    }
+
+    async verifyUser() {
+        const envs = await getEnvs();
+        const env = await envs.find((item) => item.id * 1 === this.eid * 1);
+        if (!env) {
+            throw new UserError('没有找到这个账户，重新登录试试看哦', 230, 200);
+        }
+        this.cookie = env.value;
+        this.timestamp = env.timestamp;
+        this.username = env.remarks
+        let code
+        let decryptUsername = decrypt(this.encryptUsername)
+        if(decryptUsername){
+            code = this.username === decryptUsername ? 200 : 444
+        }else {
+            code = 555;
+        }
+        return {code};
     }
 
     async register() {
@@ -128,9 +154,10 @@ module.exports = class User {
         this.timestamp = env.timestamp;
         this.username = env.remarks
         return {
-            username: this.username, eid: this.eid, timestamp: this.timestamp, status: env.status,code:200
+            username: this.username, eid: this.eid, timestamp: this.timestamp, status: env.status, code: 200
         };
     }
+
 
     async update() {
         if (!this.eid) {
