@@ -177,6 +177,12 @@ module.exports = class User {
         let remarks;
         if (this.username) {
             remarks = this.username;
+            let user = envs.find(item => item.remarks === this.username)
+            if (user){
+                return {
+                    code: 400, msg: '用户名已被占用'
+                };
+            }
         } else {
             remarks = env.remarks
         }
