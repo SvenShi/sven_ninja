@@ -224,9 +224,7 @@ export default {
     onMounted(() => {
       const eid = localStorage.getItem('eid')
       if (eid !== '0' && eid) {
-        if (flag){
           router.push("/")
-        }
       } else {
         getInfo()
       }
