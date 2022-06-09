@@ -1,6 +1,6 @@
 # 重要通知
 
-如启动失败尝试在backend目录运行 `pnpm install` 安装依赖
+如启动失败尝试在backend目录运行 `pnpm install` 安装依赖后再运行 `pm2 start`
 
 # Ninja
 
