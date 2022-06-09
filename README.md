@@ -1,4 +1,6 @@
-# 如启动失败尝试在backend目录运行 `pnpm install` 安装依赖
+# 重要通知
+
+如启动失败尝试在backend目录运行 `pnpm install` 安装依赖
 
 # Ninja
 
