@@ -1,3 +1,7 @@
+# 重要通知
+
+如启动失败尝试在backend目录运行 `pnpm install` 安装依赖后再运行 `pm2 start`
+
 # Ninja
 
 支持CK注册，登录和删除，登录成功进入个人中心，可修改备注。
@@ -133,6 +137,7 @@ CLIENT_SECRET=********
 - `ALLOW_ADMIN`: 是否开启管理员账号（默认 `false`，`true`开启）
 - `ADMIN_USERNAME`: 管理员账号（默认 `admin`） 
 - `ADMIN_PASSWORD`: 管理员密码（默认 `123456`）
+- `USERNAME_SALT`: 用户名加密密钥，强烈建议修改 可以随意填写任何内容但是长度必须为8的倍数 8 16 24 32 系统将根据该值来对用户名进行加密
 
 配置方式：
 
@@ -159,6 +164,7 @@ cd /ql/ninja
 git checkout .
 git pull
 cd backend
+pnpm install
 pm2 start
 ```
 
