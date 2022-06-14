@@ -131,7 +131,7 @@ pm2 start
    在 `.env` 文件中添加以下内容：
    
    ```bash
-   QL_URL=http://localhost:5700
+   QL_URL=http://localhost:5700 #青龙端口如果为5700 则无需添加此变量
    ```
    在 `.env` 文件中修改以下内容：
    ```bash
