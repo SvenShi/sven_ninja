@@ -73,6 +73,18 @@ export default {
   created() {
     this.verifyVersion()
     const that = this
+    window.screenWidth = document.body.clientWidth;
+    that.screenWidth = window.screenWidth
+    if (that.screenWidth * 0.4 <= 400){
+      if (that.screenWidth <= 410){
+        that.dialogWidth = `${that.screenWidth - 10}px`
+      }else {
+        that.dialogWidth = '400px'
+      }
+    }else {
+      that.dialogWidth = '40%'
+    }
+
     window.onresize = () => {
       window.screenWidth = document.body.clientWidth;
       that.screenWidth = window.screenWidth
@@ -85,7 +97,6 @@ export default {
       }else {
         that.dialogWidth = '40%'
       }
-      console.log(that.dialogWidth)
     }
   },
   methods: {
