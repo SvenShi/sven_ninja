@@ -140,6 +140,22 @@ router.post('/api/setContent', body(), async (ctx) => {
     ctx.body = {data};
 });
 
+router.get('/api/getAllConfig', async (ctx) => {
+    const query = ctx.query;
+    const token = query.token;
+    const user = new User({token});
+    const data = await user.getAllConfig();
+    ctx.body = {data};
+});
+
+router.post('/api/saveConfig', body(), async (ctx) => {
+    const body = ctx.request.body;
+    const user = new User({token:body.token})
+    const data = await user.saveConfig(body);
+    ctx.body = {data};
+});
+
+
 
 const port = process.env.NINJA_PORT || 5701;
 console.log('Start Ninja success! listening port: ' + port);

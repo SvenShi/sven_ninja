@@ -3,17 +3,14 @@
 require('dotenv').config();
 
 const {
-    addEnv, delEnv, getEnvs, getEnvsCount, updateEnv, disable, enable, getToken
+    addEnv, delEnv, getEnvs, updateEnv, disable, enable, getToken
 } = require('./ql');
 
 const {
     encrypt, decrypt
 } = require('./encryptUtil')
 
-const adminAcct = {
-    username: process.env.ADMIN_USERNAME, password: process.env.ADMIN_PASSWORD
-}
-const allowAdmin = process.env.ALLOW_ADMIN
+const NinjaConfig = require('./ninjaConfig');
 
 let staticToken;
 
@@ -44,24 +41,29 @@ module.exports = class User {
     }
 
     async login() {
-        if (this.username === adminAcct.username) {
-            if (allowAdmin === 'true') {
+        let config = NinjaConfig.getInstance()
+        if (this.username === config.adminUsername) {
+            if (config.allowAdmin) {
                 //管理员登录
                 if (this.password) {
-                    if (this.password === adminAcct.password) {
-                        staticToken = await getToken()
+                    if (this.password === config.adminPassword) {
+                        try{
+                            staticToken = await getToken()
+                        }catch (exception){
+                            staticToken = Date.now() + encrypt(this.username)
+                        }
                         return {
-                            errCode: 0, username: adminAcct.username, eid: 0, token: staticToken
+                            errCode: 0, username: config.adminUsername, eid: 0, token: staticToken
                         };
                     }
                 } else {
                     return {
-                        errCode: 1, username: adminAcct.username
+                        errCode: 1, username: config.adminUsername
                     };
                 }
             } else {
                 return {
-                    errCode: 2, username: adminAcct.username
+                    errCode: 2, username: config.adminUsername
                 };
             }
         }
@@ -82,7 +84,6 @@ module.exports = class User {
 
     async verifyToken() {
         let code = this.token === staticToken ? 200 : 444;
-        staticToken = '';
         return {code}
     }
 
@@ -97,16 +98,17 @@ module.exports = class User {
         this.username = env.remarks
         let code
         let decryptUsername = decrypt(this.encryptUsername)
-        if(decryptUsername){
+        if (decryptUsername) {
             code = this.username === decryptUsername ? 200 : 444
-        }else {
+        } else {
             code = 555;
         }
         return {code};
     }
 
     async register() {
-        if (this.username === adminAcct.username) {
+        let config = NinjaConfig.getInstance()
+        if (this.username === config.adminUsername) {
             return {
                 username: this.username, errCode: 201
             };
@@ -178,7 +180,7 @@ module.exports = class User {
         if (this.username) {
             remarks = this.username;
             let user = envs.find(item => item.remarks === this.username)
-            if (user){
+            if (user) {
                 return {
                     code: 400, msg: '用户名已被占用'
                 };
@@ -213,7 +215,7 @@ module.exports = class User {
             throw new UserError(body.message || 'CK禁用失败，尝试重新登录后重试', 240, body.code || 500);
         }
         return {
-            code: 200, msg: 'CK禁用成功'
+            code: 200, msg: 'CK已禁用'
         };
     }
 
@@ -224,17 +226,40 @@ module.exports = class User {
             throw new UserError(body.message || 'CK启用失败，尝试重新登录后重试', 240, body.code || 500);
         }
         return {
-            code: 200, msg: 'CK启用成功'
+            code: 200, msg: 'CK已启用'
         };
     }
 
     static async getPoolInfo() {
-        const count = await getEnvsCount();
-        const allowCount = (process.env.ALLOW_NUM || 40) - count;
-
+        const envs = await getEnvs();
+        let userNames = new Set()
+        envs.map(item => {
+            userNames.add(item.remarks);
+        })
+        let config = NinjaConfig.getInstance()
         return {
-            marginCount: allowCount >= 0 ? allowCount : 0, allowAdd: Boolean(process.env.ALLOW_ADD) || false, code: 200
-        };
+            marginCount: config.allowNum - userNames.size,
+            allowAdd: config.allowAdd,
+            allowSetStatus: config.allowSetStatus,
+            code: 200
+        }
+    }
+
+    async getAllConfig() {
+        if (this.token === staticToken) {
+            return {...NinjaConfig.getInstance(), code: 200};
+        } else {
+            return {code: 401, msg: '未授权的操作'}
+        }
+    }
+
+    async saveConfig(config) {
+        if (this.token === staticToken) {
+            NinjaConfig.getInstance().saveConfig(config)
+            return {code: 200, msg: "修改成功"}
+        } else {
+            return {code: 401, msg: '未授权的操作'}
+        }
     }
 };
 

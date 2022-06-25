@@ -13,10 +13,12 @@
                                                                                            style="color: green;display: inline">正常</p></span>
       </div>
       <div class="card-footer">
-        <el-button size="small" auto @click="logout">退出登录</el-button>
-        <!--        <el-button v-if="userStatus === 0" type="danger" size="small" auto @click="disableCK">禁用</el-button>-->
-        <!--        <el-button v-if="userStatus === 1" type="success" size="small" auto @click="enableCK">启用</el-button>-->
-        <el-button type="danger" size="small" auto @click="delAccount">删除账号</el-button>
+        <el-button auto @click="logout" style="margin-right: 10px;" v-loading.fullscreen.lock="loading">退出登录</el-button>
+        <span v-if="showEnableCk" style="display: inline">
+          <el-button v-if="userStatus === 0" style="margin-right: 10px;" type="danger" auto @click="disableCK">禁用</el-button>
+          <el-button v-if="userStatus === 1"  style="margin-right: 10px;" type="success" auto @click="enableCK">启用</el-button>
+        </span>
+        <el-button type="danger" auto @click="delAccount" v-loading.fullscreen.lock="loading">删除账号</el-button>
       </div>
     </div>
 
@@ -27,11 +29,11 @@
       <div class="card-body text-base leading-6" v-html="usernameContent">
       </div>
       <div class="card-body text-center">
-        <el-input v-model="username" style="min-width: 200px" @keyup.enter="updateUsername" size="small" clearable
+        <el-input v-model="username" style="min-width: 200px" @keyup.enter="updateUsername" clearable
                   class="my-4 w-full"/>
       </div>
       <div class="card-footer">
-        <el-button type="success" size="small" auto @click="updateUsername">修改</el-button>
+        <el-button type="success" auto @click="updateUsername" v-loading.fullscreen.lock="loading">修改</el-button>
       </div>
     </div>
 
@@ -42,11 +44,11 @@
       <div class="card-body text-base leading-6" v-html="cookieContent">
       </div>
       <div class="card-body text-center">
-        <el-input v-model="cookie" style="min-width: 300px" @keyup.enter="updateCookie" size="small" clearable
+        <el-input v-model="cookie" style="min-width: 300px" @keyup.enter="updateCookie" clearable
                   class="my-4 w-full"/>
       </div>
       <div class="card-footer">
-        <el-button type="success" size="small" auto @click="updateCookie">更新</el-button>
+        <el-button type="success" auto @click="updateCookie" v-loading.fullscreen.lock="loading">更新</el-button>
       </div>
     </div>
   </div>
@@ -58,16 +60,16 @@ import {
   delAccountAPI,
   updateAPI,
   disableAPI,
-  enableAPI, getContent, verifyUser
+  enableAPI,
+  getContent,
+  verifyUser, getInfoAPI
 } from '@/api'
-import {onMounted, reactive, toRefs} from 'vue'
-import {useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox} from 'element-plus'
 
 export default {
-  setup() {
-    const router = useRouter()
-    let data = reactive({
+  data() {
+    return {
+      loading: true,
       profileContent: '',
       usernameContent: '',
       cookieContent: '',
@@ -76,50 +78,70 @@ export default {
       nickName: undefined,
       timestamp: undefined,
       userStatus: undefined,
-    })
-
-    const getInfo = async () => {
+      showEnableCk: false
+    }
+  },
+  mounted() {
+    this.getInfo()
+    this.initContent()
+  },
+  methods: {
+    async getInfo() {
+      const that = this
       const eid = localStorage.getItem('eid')
       if (eid === '0' || !eid) {
-        logout()
+        that.logout()
         return
       }
 
-      let userRes = await verifyUser()
-      if (userRes.data.code !== 200) {
-        if (userRes.data.code === 555) {
-          ElMessage.error('检查环境变量中配置的密钥长度是否为8的倍数')
-        } else {
-          ElMessage.error('用户信息验证失败')
-        }
-        logout()
-        return
-      }
-
-      if (eid) {
-        const userInfo = await getUserInfoAPI(eid)
-        if (userInfo.code === 400) {
-          ElMessage.error(userInfo.message)
+      getInfoAPI().then(res =>{
+        if (res.data && res.data.code === 200){
+          that.showEnableCk = Boolean(res.data.allowSetStatus)
+        }else {
+          ElMessage.error(res.message)
+          that.loading = false
+          that.logout()
           return
         }
-        if (!userInfo) {
-          ElMessage.error('获取用户CK信息失败，请重新登录')
-          logout()
-          return
-        }
-        data.nickName = userInfo.data.username
-        data.userStatus = userInfo.data.status
-        data.timestamp = new Date(userInfo.data.timestamp).toLocaleString()
-      }
-    }
 
-    const logout = () => {
+        verifyUser().then(res =>{
+          if (res.data.code !== 200) {
+            if (res.data.code === 555) {
+              ElMessage.error('检查环境变量中配置的密钥长度是否为8的倍数')
+            } else {
+              ElMessage.error('用户信息验证失败')
+            }
+            that.logout()
+          }
+
+          if (eid) {
+            getUserInfoAPI(eid).then(res =>{
+              if (res.code === 400) {
+                ElMessage.error(res.message)
+                return
+              }
+              if (!res) {
+                ElMessage.error('获取用户CK信息失败，请重新登录')
+                that.logout()
+                return
+              }
+              that.nickName = res.data.username
+              that.userStatus = res.data.status
+              that.timestamp = new Date(res.data.timestamp).toLocaleString()
+              that.loading = false
+            })
+          }
+        })
+      })
+    },
+    logout() {
       localStorage.removeItem('eid')
       localStorage.removeItem('encryptUsername')
-      router.push('/login')
-    }
-
-    const delAccount = async () => {
+      this.$router.push('/login')
+    },
+    delAccount() {
+      this.loading = true
+      const that = this
       ElMessageBox.confirm("确定删除账号", "警告", {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -129,40 +151,44 @@ export default {
         const body = await delAccountAPI({eid})
         if (body.data.code === 200) {
           ElMessage.success(body.data.msg)
-          logout()
+          that.logout()
         } else {
           ElMessage.error(body.data.msg || body.message)
         }
+        this.loading = false
       })
-    }
-
-    const updateUsername = async () => {
-      if (data.username) {
+    },
+    async updateUsername() {
+      this.loading = true
+      if (this.username) {
         const eid = localStorage.getItem('eid')
         if (eid) {
-          const body = await updateAPI({eid, ck: null, username: data.username})
+          const body = await updateAPI({eid, ck: null, username: this.username})
           if (body.data && body.data.code && body.data.code === 200) {
-            ElMessage.success(body.data.msg)
+            localStorage.removeItem('eid')
+            localStorage.removeItem('encryptUsername')
+            await this.$router.push({name: 'login', params: {isUpdate: 'true'}})
           } else {
             ElMessage.error(body.data.msg || body.message)
           }
+          this.loading = false
         }
-        await getInfo()
       } else {
         ElMessage.error("请输入用户名！")
       }
-    }
-    const updateCookie = async () => {
-      if (data.cookie) {
+    },
+    async updateCookie() {
+      this.loading = true
+      if (this.cookie) {
         const eid = localStorage.getItem('eid')
         let cookie
         if (eid) {
           const ptKey =
-              data.cookie.match(/pt_key=(.*?);/) &&
-              data.cookie.match(/pt_key=(.*?);/)[1]
+              this.cookie.match(/pt_key=(.*?);/) &&
+              this.cookie.match(/pt_key=(.*?);/)[1]
           const ptPin =
-              data.cookie.match(/pt_pin=(.*?);/) &&
-              data.cookie.match(/pt_pin=(.*?);/)[1]
+              this.cookie.match(/pt_pin=(.*?);/) &&
+              this.cookie.match(/pt_pin=(.*?);/)[1]
           if (ptKey && ptPin) {
             cookie = 'pt_key=' + ptKey + ';pt_pin=' + ptPin + ';';
           } else {
@@ -177,60 +203,64 @@ export default {
             ElMessage.error(body.data.msg || body.message)
           }
         }
-        await getInfo()
+        await this.getInfo()
       } else {
         ElMessage.error("请输入Cookie！")
       }
-    }
-
-    const disableCK = async () => {
-      const eid = localStorage.getItem('eid')
-      if (eid) {
-        const body = await disableAPI({eid})
-        if (body.data && body.data.code && body.data.code === 200) {
-          ElMessage.success(body.msg)
-        } else {
-          ElMessage.error(body.data.msg || body.message)
+    },
+    async disableCK() {
+      const that = this
+      ElMessageBox.confirm("确定禁用吗", "警告", {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.loading = true
+        const eid = localStorage.getItem('eid')
+        if (eid) {
+          disableAPI({eid}).then(res => {
+            if (res.data && res.data.code && res.data.code === 200) {
+              ElMessage.success(res.data.msg)
+            } else {
+              ElMessage.error(res.data.msg || res.message)
+            }
+            that.getInfo()
+          })
         }
-      }
-      await getInfo()
-    }
-
-    const enableCK = async () => {
-      const eid = localStorage.getItem('eid')
-      if (eid) {
-        const body = await enableAPI({eid})
-        if (body.data && body.data.code && body.data.code === 200) {
-          ElMessage.success(body.msg)
-        } else {
-          ElMessage.error(body.data.msg || body.message)
+      })
+    },
+    async enableCK() {
+      ElMessageBox.confirm("启用前请先确认已更新CK", "警告", {
+        confirmButtonText: '已确认',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.loading = true
+        const eid = localStorage.getItem('eid')
+        if (eid) {
+          enableAPI({eid}).then(res => {
+            if (res.data && res.data.code && res.data.code === 200) {
+              ElMessage.success(res.data.msg)
+            } else {
+              ElMessage.error(res.data.msg || res.message)
+            }
+          })
         }
-      }
-      await getInfo()
+      })
+    },
+    initContent() {
+      const that = this
+      getContent('profile').then(res => {
+        that.profileContent = res.data.content
+      })
+      getContent('updateUsername').then(res => {
+        that.usernameContent = res.data.content
+      })
+      getContent('updateCookie').then(res => {
+        that.cookieContent = res.data.content
+      })
     }
-
-    const initContent = async () => {
-      data.profileContent = (await getContent('profile')).data.content
-      data.usernameContent = (await getContent('updateUsername')).data.content
-      data.cookieContent = (await getContent('updateCookie')).data.content
-    }
-
-    onMounted(() => {
-      getInfo()
-      initContent()
-    })
-
-    return {
-      ...toRefs(data),
-      getInfo,
-      logout,
-      delAccount,
-      updateUsername,
-      updateCookie,
-      disableCK,
-      enableCK
-    }
-  },
+  }
 }
 </script>
 

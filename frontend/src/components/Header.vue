@@ -3,7 +3,7 @@
     <div class="header-wrapper">
       <div class="flex items-center">
         <Logo class="h-10 w-10" />
-        <p class="pl-3 select-none">Ninja</p>
+        <p class="pl-3 select-none" style="cursor: pointer" @click="$router.push('/')" >Ninja</p>
       </div>
       <a style="float: right" href="https://github.com/sw-ashai/ashai_ninja" target="_blank" data-hotkey="g d" aria-label="Homepage " data-turbo="false" data-analytics-event="{&quot;category&quot;:&quot;Header&quot;,&quot;action&quot;:&quot;go to dashboard&quot;,&quot;label&quot;:&quot;icon:logo&quot;}">
         <svg height="32" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="32" data-view-component="true" class="octicon octicon-mark-github v-align-middle">

@@ -12,21 +12,22 @@ export function login(body) {
     return api.post('login', {json: body}).json()
 }
 
-
 export function registerUser(body) {
     return api.post('register', {json: body}).json()
 }
 
-export function verifyToken() {
-    const token = localStorage.getItem('token')
-    if (!token){
-        return {
-            data:{
-                code:444
-            }
-        };
-    }
+export function verifyToken(token) {
     return api.post('verifyToken', {json: {token}}).json()
+}
+
+export function getAllConfig(token){
+    const searchParams = new URLSearchParams()
+    searchParams.set('token', token)
+    return api.get('getAllConfig', {searchParams: searchParams}).json()
+}
+
+export function saveConfig(body) {
+    return api.post('saveConfig', {json: body}).json()
 }
 
 export function verifyUser() {

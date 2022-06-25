@@ -7,31 +7,31 @@ const api = got.extend({
     retry: {limit: 0},
 });
 
-const qlClient = {
-    clientId: process.env.CLIENT_ID, clientSecret: process.env.CLIENT_SECRET
-}
+const NinjaConfig = require('./ninjaConfig');
 
 
 async function getToken() {
+    let config = NinjaConfig.getInstance()
     const body = await api({
         url: 'open/auth/token', searchParams: {
-            client_id: qlClient.clientId, client_secret: qlClient.clientSecret,
+            client_id: config.clientId, client_secret: config.clientSecret,
         }
     }).json();
     if (body.code !== 200) {
-        throw new QLError("青龙令牌配置错误，请检查.env文件配置是否正确！", 400, 400)
+        throw new QLError("青龙令牌配置错误，请前往管理页面配置！", 400, 400)
     }
     return body.data.token;
 }
 
 module.exports.getToken = async () => {
+    let config = NinjaConfig.getInstance()
     const body = await api({
         url: 'open/auth/token', searchParams: {
-            client_id: qlClient.clientId, client_secret: qlClient.clientSecret,
+            client_id: config.clientId, client_secret: config.clientSecret,
         }
     }).json();
     if (body.code !== 200) {
-        throw new QLError("青龙令牌配置错误，请检查.env文件配置是否正确！", 400, 400)
+        throw new QLError("青龙令牌配置错误，请前往管理页面配置！", 400, 400)
     }
     return body.data.token;
 }
@@ -46,11 +46,6 @@ module.exports.getEnvs = async () => {
         },
     }).json();
     return body.data;
-};
-
-module.exports.getEnvsCount = async () => {
-    const data = await this.getEnvs();
-    return data.length;
 };
 
 module.exports.addEnv = async (cookie, remarks) => {
@@ -95,7 +90,7 @@ module.exports.delEnv = async (eid) => {
 module.exports.disable = async (eid) => {
     const token = await getToken();
     const body = await api({
-        method: 'put', url: 'open/disable', params: {t: Date.now()}, body: JSON.stringify([eid]), headers: {
+        method: 'put', url: 'open/envs/disable', params: {t: Date.now()}, body: JSON.stringify([eid]), headers: {
             Accept: 'application/json',
             authorization: `Bearer ${token}`,
             'Content-Type': 'application/json;charset=UTF-8',
@@ -107,7 +102,7 @@ module.exports.disable = async (eid) => {
 module.exports.enable = async (eid) => {
     const token = await getToken();
     const body = await api({
-        method: 'put', url: 'open/enable', params: {t: Date.now()}, body: JSON.stringify([eid]), headers: {
+        method: 'put', url: 'open/envs/enable', params: {t: Date.now()}, body: JSON.stringify([eid]), headers: {
             Accept: 'application/json',
             authorization: `Bearer ${token}`,
             'Content-Type': 'application/json;charset=UTF-8',

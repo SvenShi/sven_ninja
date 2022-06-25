@@ -1,5 +1,5 @@
 {
-  "version": "22.06.09",
+  "version": "22.06.26",
   "scripts": {
     "dev": "nodemon app.js"
   },
@@ -17,7 +17,6 @@
     "koa-body": "^4.2.0",
     "koa-log4": "^2.3.2",
     "koa-static": "^5.0.0",
-    "nodemon": "^2.0.12",
-    "qrcode": "^1.4.4"
+    "nodemon": "^2.0.18"
   }
 }

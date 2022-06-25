@@ -1,10 +1,9 @@
 'use strict';
 const CryptoJS = require("crypto-js")
-var AES = require("crypto-js/aes");
-var SHA256 = require("crypto-js/sha256");
+const NinjaConfig = require('./ninjaConfig');
 
 //秘钥
-const key = CryptoJS.enc.Utf8.parse(process.env.USERNAME_SALT || 'ninja123');
+const key = CryptoJS.enc.Utf8.parse(NinjaConfig.getInstance().usernameSalt || 'ninja123');
 const iv = CryptoJS.enc.Utf8.parse('thisprojectisshit');
 const option = {
     iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
