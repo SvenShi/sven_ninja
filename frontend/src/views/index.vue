@@ -107,33 +107,35 @@ export default {
         }
 
         verifyUser().then(res => {
-          if (res.data.code !== 200) {
-            if (res.data.code === 555) {
+          if (res.data && res.data.code === 200){
+            if (eid) {
+              getUserInfoAPI(eid).then(res => {
+                if (res.code === 400) {
+                  ElMessage.error(res.message)
+                  return
+                }
+                if (!res) {
+                  ElMessage.error('获取用户CK信息失败，请重新登录')
+                  that.logout()
+                  return
+                }
+                that.nickName = res.data.username
+                that.userStatus = res.data.status
+                that.timestamp = new Date(res.data.timestamp).toLocaleString()
+                that.loading = false
+              })
+            }
+          }else{
+            if (res.data && res.data.code === 555) {
               ElMessage.error('检查环境变量中配置的密钥长度是否为8的倍数')
             } else {
               ElMessage.error('用户信息验证失败')
             }
             that.logout()
-          }
-
-          if (eid) {
-            getUserInfoAPI(eid).then(res => {
-              if (res.code === 400) {
-                ElMessage.error(res.message)
-                return
-              }
-              if (!res) {
-                ElMessage.error('获取用户CK信息失败，请重新登录')
-                that.logout()
-                return
-              }
-              that.nickName = res.data.username
-              that.userStatus = res.data.status
-              that.timestamp = new Date(res.data.timestamp).toLocaleString()
-              that.loading = false
-            })
+            that.loading = false
           }
         })
+
       })
     },
     logout() {
