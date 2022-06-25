@@ -226,16 +226,20 @@ export default {
             }
             that.getInfo()
           })
+        }else {
+          that.loading = false
+          that.$router.push('/')
         }
       })
     },
     async enableCK() {
+      const that = this
       ElMessageBox.confirm("启用前请先确认已更新CK", "警告", {
         confirmButtonText: '已确认',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.loading = true
+        that.loading = true
         const eid = localStorage.getItem('eid')
         if (eid) {
           enableAPI({eid}).then(res => {
@@ -244,7 +248,11 @@ export default {
             } else {
               ElMessage.error(res.data.msg || res.message)
             }
+            that.getInfo()
           })
+        }else {
+          that.loading = false
+          that.$router.push('/')
         }
       })
     },
