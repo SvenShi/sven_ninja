@@ -14,8 +14,8 @@
                     v-model="configForm.allowAdd"
                 />
               </el-form-item>
-              <el-form-item label="现有用户" prop="marginCount">
-                <el-input v-model.number="this.marginCount" disabled style="width: 30%;min-width: 100px"></el-input>
+              <el-form-item label="现有用户" prop="needMargin">
+                <el-input v-model.number="this.needMargin" disabled style="width: 30%;min-width: 100px"></el-input>
               </el-form-item>
               <el-form-item label="用户容量" prop="allowNum">
                 <el-input v-model.number="configForm.allowNum" :disabled="exception.noToken"
@@ -56,7 +56,8 @@
           <el-tab-pane label="自定义标语" name="slogan"
                        style="overflow:hidden; overflow-y: auto; height: calc(100vh - 300px); text-align: center">
             <div style="margin-left: 10px;margin-right: 10px">
-              <div style="padding-bottom: 10px" v-for="item in contents" :key="item.showSeq">
+              <div style="padding-bottom: 10px" v-for="item in sortContents"
+                   :key="item.showSeq">
                 <p style="float: left;font-size: 18px;margin-bottom: 10px">{{ item.title }}</p>
                 <el-input
                     v-model="item.content"
@@ -160,7 +161,6 @@ export default {
       alarm: {},
       formInited: false,
       needMargin: undefined,
-      marginCount: undefined,
       exception: {}
     }
   },
@@ -201,7 +201,15 @@ export default {
       }
     }
   },
+  computed: {
+    sortContents: function () {
+      return this.contents.sort(this.sortContent);
+    }
+  },
   methods: {
+    sortContent(a, b) {
+      return a.showSeq - b.showSeq
+    },
     verify() {
       this.token = this.$route.params.token
       if (this.token) {
@@ -248,11 +256,10 @@ export default {
           this.formInited = true
         })
         getInfoAPI().then(res => {
-          if (res.data && res.data.code === 200){
+          if (res.data && res.data.code === 200) {
             that.needMargin = Number(this.configForm.allowNum) - Number(res.data.marginCount)
-            that.marginCount = res.data.marginCount
             that.loading = false
-          }else {
+          } else {
             ElMessage.error(res.message)
             that.loading = false
             that.$router.push('/')
@@ -266,7 +273,7 @@ export default {
           content: res.data.content,
           title: '自定义登录以及注册上方提示',
           contentName: 'tip',
-          showSeq: 0
+          showSeq: 1
         })
       })
       getContent('login').then(res => {
@@ -274,7 +281,7 @@ export default {
           content: res.data.content,
           title: '自定义登录上方提示',
           contentName: 'login',
-          showSeq: 1
+          showSeq: 2
         })
       })
       getContent('register').then(res => {
@@ -282,7 +289,7 @@ export default {
           content: res.data.content,
           title: '自定义注册上方提示',
           contentName: 'register',
-          showSeq: 2
+          showSeq: 3
         })
       })
       getContent('profile').then(res => {
@@ -290,7 +297,7 @@ export default {
           content: res.data.content,
           title: '自定义个人中心上方提示',
           contentName: 'profile',
-          showSeq: 3
+          showSeq: 4
         })
       })
       getContent('updateUsername').then(res => {
@@ -298,7 +305,7 @@ export default {
           content: res.data.content,
           title: '自定义修改用户名上方提示',
           contentName: 'updateUsername',
-          showSeq: 4
+          showSeq: 5
         })
       })
       getContent('updateCookie').then(res => {
@@ -306,7 +313,7 @@ export default {
           content: res.data.content,
           title: '自定义修改Cookie上方提示',
           contentName: 'updateCookie',
-          showSeq: 5
+          showSeq: 6
         })
       })
     }
