@@ -27,7 +27,7 @@
           </el-form-item>
           <el-form-item v-if="isAdmin" label="密码" prop="password">
             <el-input v-model="userInfo.password" ref="passwordInput" type="password" @keyup.enter="loginUser"
-                      style="width: 50%;margin-left: 20px;min-width: 200px"/> <el-icon style="margin-left: 5px;cursor: pointer" @click="isAdmin = false"><CircleClose class="icon" /></el-icon>
+                      style="width: 50%;margin-left: 20px;min-width: 200px"/> <el-icon style="margin-left: 5px;cursor: pointer" @click="isAdmin = false;userInfo.password = '';"><CircleClose class="icon" /></el-icon>
           </el-form-item>
           <div style="text-align: center;">
             <el-button type="primary" v-loading.fullscreen.lock="loading" :disabled="!userInfo.username" @click="loginUser">登录</el-button>
@@ -139,6 +139,8 @@ export default {
       if (this.isAdmin) {
         if (!this.userInfo.password) {
           ElMessage.error('请输入密码')
+          this.loading = false
+          return
         }
       }
       if (this.userInfo.username) {
