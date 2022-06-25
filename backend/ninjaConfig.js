@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 'use strict';
 const DEF_CONFIG = {
-    allowAdd: process.env.QL_URL,
+    allowAdd: process.env.ALLOW_ADD,
     allowNum: process.env.ALLOW_NUM,
     clientId: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
