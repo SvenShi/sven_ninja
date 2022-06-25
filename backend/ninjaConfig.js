@@ -1,14 +1,14 @@
 /* eslint-disable camelcase */
 'use strict';
 const DEF_CONFIG = {
-    allowAdd: process.env.ALLOW_ADD,
-    allowNum: process.env.ALLOW_NUM,
+    allowAdd: process.env.ALLOW_ADD || true,
+    allowNum: process.env.ALLOW_NUM || 20,
     clientId: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    allowAdmin: process.env.ALLOW_ADMIN,
-    usernameSalt: process.env.USERNAME_SALT,
-    adminUsername: process.env.ADMIN_USERNAME,
-    adminPassword: process.env.ADMIN_PASSWORD,
+    allowAdmin: process.env.ALLOW_ADMIN || true,
+    usernameSalt: process.env.USERNAME_SALT || 'ninja123',
+    adminUsername: process.env.ADMIN_USERNAME || 'admin',
+    adminPassword: process.env.ADMIN_PASSWORD || '123456',
 };
 module.exports = class NinjaConfig {
     constructor({ allowAdd, allowNum, clientId, clientSecret, allowAdmin, usernameSalt, adminUsername, adminPassword }) {
