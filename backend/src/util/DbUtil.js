@@ -42,6 +42,12 @@ module.exports = class DbUtil {
         if (!fs.existsSync(this.dbPath)) {
             fs.writeFileSync(this.dbPath, '')
         }
+        if (!fs.existsSync(filePrefixPath)) {
+            fs.mkdirSync(filePrefixPath)
+        }
+        if (!fs.existsSync(this.dbPath)) {
+            fs.writeFileSync(this.dbPath, '')
+        }
         let buffer = fs.readFileSync(this.dbPath)
         let dataStr = buffer.toString()
         let db = {};
