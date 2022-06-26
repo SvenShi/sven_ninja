@@ -220,8 +220,8 @@ export default {
         if (that.token) {
           verifyToken(that.token).then(res => {
             if (res.code !== 200) {
+              that.exception.noToken = true
               resolve(false)
-              that.$router.push("/login")
             }
             resolve(true)
           })
@@ -266,9 +266,9 @@ export default {
               that.needMargin = Number(this.configForm.allowNum) - Number(res.data.marginCount)
               that.loading = false
             } else {
+              that.exception.noToken = true
               ElMessage.error(res.msg)
               that.loading = false
-              that.$router.push('/')
             }
           })
         } else {
