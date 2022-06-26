@@ -28,6 +28,9 @@ import UpdateLog from './components/updateLog.vue'
   @apply bg-gray-50 min-h-screen pb-5 select-none;
 }
 
+.el-message-box {
+  width: 350px
+}
 *,
 *::before,
 *::after {

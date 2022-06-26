@@ -7,7 +7,7 @@ const api = got.extend({
     retry: {limit: 0},
 });
 
-const NinjaConfig = require('./ninjaConfig');
+const NinjaConfig = require('../util/ninjaConfig');
 
 
 async function getToken() {
@@ -18,7 +18,7 @@ async function getToken() {
         }
     }).json();
     if (body.code !== 200) {
-        throw new QLError("青龙令牌配置错误，请前往管理页面配置！", 400, 400)
+        throw new QLError("青龙令牌配置错误，请前往管理页面配置！", 500)
     }
     return body.data.token;
 }
@@ -31,7 +31,7 @@ module.exports.getToken = async () => {
         }
     }).json();
     if (body.code !== 200) {
-        throw new QLError("青龙令牌配置错误，请前往管理页面配置！", 400, 400)
+        throw new QLError("青龙令牌配置错误，请前往管理页面配置！", 500)
     }
     return body.data.token;
 }
@@ -45,12 +45,15 @@ module.exports.getEnvs = async () => {
             Accept: 'application/json', authorization: `Bearer ${token}`,
         },
     }).json();
+    if (body.code !== 200) {
+        throw new QLError(body.message, body.code)
+    }
     return body.data;
 };
 
 module.exports.addEnv = async (cookie, remarks) => {
     const token = await getToken();
-    return api({
+    let body = await api({
         method: 'post', url: 'open/envs', params: {t: Date.now()}, json: [{
             name: 'JD_COOKIE', value: cookie, remarks,
         }], headers: {
@@ -59,6 +62,10 @@ module.exports.addEnv = async (cookie, remarks) => {
             'Content-Type': 'application/json;charset=UTF-8',
         },
     }).json()
+    if (body.code !== 200) {
+        throw new QLError(body.message, body.code)
+    }
+    return body
 };
 
 module.exports.updateEnv = async (cookie, eid, remarks) => {
@@ -72,6 +79,9 @@ module.exports.updateEnv = async (cookie, eid, remarks) => {
             'Content-Type': 'application/json;charset=UTF-8',
         },
     }).json();
+    if (body.code !== 200) {
+        throw new QLError(body.message, body.code)
+    }
     return body;
 };
 
@@ -84,6 +94,9 @@ module.exports.delEnv = async (eid) => {
             'Content-Type': 'application/json;charset=UTF-8',
         },
     }).json();
+    if (body.code !== 200) {
+        throw new QLError(body.message, body.code)
+    }
     return body;
 };
 
@@ -96,6 +109,9 @@ module.exports.disable = async (eid) => {
             'Content-Type': 'application/json;charset=UTF-8',
         },
     }).json();
+    if (body.code !== 200) {
+        throw new QLError(body.message, body.code)
+    }
     return body;
 };
 
@@ -108,6 +124,9 @@ module.exports.enable = async (eid) => {
             'Content-Type': 'application/json;charset=UTF-8',
         },
     }).json();
+    if (body.code !== 200) {
+        throw new QLError(body.message, body.code)
+    }
     return body;
 };
 

@@ -2,6 +2,8 @@
 'use strict';
 
 let fs = require("fs")
+const JsonResult = require('../util/jsonResult');
+
 
 module.exports = class Content {
     fileName;
@@ -14,13 +16,11 @@ module.exports = class Content {
 
     async writFile() {
         fs.writeFileSync(this.fileName, this.fileContent)
-        return {code: 200}
+        return JsonResult.success('修改成功')
     }
 
     async readFile() {
         let buffer = fs.readFileSync(this.fileName)
-        return {
-            code: 200, content: buffer.toString()
-        }
+        return JsonResult.success({content: buffer.toString()})
     }
 };

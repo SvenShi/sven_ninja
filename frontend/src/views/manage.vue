@@ -8,28 +8,28 @@
         <el-tabs v-model="activeName">
           <el-tab-pane label="系统设置" name="system">
             <el-form ref="configFrom" @submit.native.prevent :model="configForm" :rules="configRules"
-                     label-width="30%">
+                     label-width="150px">
               <el-form-item label="注册开关" prop="allowAdd">
                 <el-switch
                     v-model="configForm.allowAdd"
                 />
               </el-form-item>
               <el-form-item label="现有用户" prop="needMargin">
-                <el-input v-model.number="this.needMargin" disabled style="width: 30%;min-width: 100px"></el-input>
+                <el-input v-model.number="this.needMargin" disabled style="width: 30%;min-width: 180px"></el-input>
               </el-form-item>
               <el-form-item label="用户容量" prop="allowNum">
                 <el-input v-model.number="configForm.allowNum" :disabled="exception.noToken"
-                          style="width: 30%;min-width: 100px"></el-input>
+                          style="width: 30%;min-width: 180px"></el-input>
               </el-form-item>
               <el-form-item label="青龙授权ID" prop="clientId">
-                <el-input v-model="configForm.clientId" style="width: 30%;min-width: 100px"></el-input>
+                <el-input v-model="configForm.clientId" style="width: 30%;min-width: 180px"></el-input>
               </el-form-item>
               <el-form-item label="青龙授权令牌" prop="clientSecret">
                 <el-input type="password" v-model="configForm.clientSecret"
-                          style="width: 30%;min-width: 100px"></el-input>
+                          style="width: 30%;min-width: 180px"></el-input>
               </el-form-item>
               <el-form-item label="用户名加密密钥" prop="usernameSalt">
-                <el-input v-model="configForm.usernameSalt" style="width: 30%;min-width: 100px"></el-input>
+                <el-input v-model="configForm.usernameSalt" style="width: 30%;min-width: 180px"></el-input>
               </el-form-item>
               <el-form-item label="用户禁用CK权限" prop="allowSetStatus">
                 <el-switch
@@ -42,11 +42,11 @@
                 />
               </el-form-item>
               <el-form-item label="管理员账号" prop="adminUsername">
-                <el-input v-model="configForm.adminUsername" style="width: 30%;min-width: 100px"></el-input>
+                <el-input v-model="configForm.adminUsername" style="width: 30%;min-width: 180px"></el-input>
               </el-form-item>
               <el-form-item label="管理员密码" prop="adminPassword">
                 <el-input type="password" v-model="configForm.adminPassword"
-                          style="width: 30%;min-width: 100px"></el-input>
+                          style="width: 30%;min-width: 180px"></el-input>
               </el-form-item>
               <div style="text-align: center">
                 <el-button type="primary" v-loading.fullscreen.lock="loading" @click="updateConfig()">保存</el-button>
@@ -165,9 +165,13 @@ export default {
     }
   },
   mounted() {
-    this.verify()
-    this.initContent()
-    this.initConfig()
+    let that = this
+    this.verify().then(valid => {
+      if (valid) {
+        that.initContent()
+        that.initConfig()
+      }
+    })
   },
   watch: {
     'configForm.allowAdmin'(newV, oldV) {
@@ -211,24 +215,29 @@ export default {
       return a.showSeq - b.showSeq
     },
     verify() {
-      this.token = this.$route.params.token
-      if (this.token) {
-        verifyToken(this.token).then(res => {
-          if (res.data.code !== 200) {
-            this.$router.push("/login")
-          }
-        })
-      } else {
-        ElMessage.error("您没有权限访问此页面")
-        this.$router.push("/login")
-      }
+      let that = this
+      return new Promise(resolve => {
+        that.token = that.$route.params.token
+        if (that.token) {
+          verifyToken(that.token).then(res => {
+            if (res.code !== 200) {
+              resolve(false)
+              that.$router.push("/login")
+            }
+            resolve(true)
+          })
+        } else {
+          resolve(false)
+          that.$router.push({name: 'login', params: {type: 'error', msg: '您没有权限访问此页面'}})
+        }
+      })
     },
     customContent(contentName, content) {
       setContent({contentName, content}).then(res => {
-        if (res.data.code === 200) {
-          ElMessage.success("修改成功")
+        if (res.code === 200) {
+          ElMessage.success(res.msg)
         } else {
-          ElMessage.error("修改失败")
+          ElMessage.error(res.msg)
         }
       })
     },
@@ -236,10 +245,10 @@ export default {
       this.$refs.configFrom.validate(isValid => {
         if (isValid) {
           saveConfig({...this.configForm, token: this.token}).then(res => {
-            if (res.data && res.data.code === 200) {
-              ElMessage.success(res.data.msg)
+            if (res.code === 200) {
+              ElMessage.success(res.msg)
             } else {
-              ElMessage.error(res.data.msg || res.message)
+              ElMessage.error(res.msg)
             }
           })
         }
@@ -248,73 +257,86 @@ export default {
     initConfig() {
       const that = this
       getAllConfig(this.token).then(res => {
-        this.configForm = {...res.data}
-        this.configForm.allowAdd = Boolean(this.configForm.allowAdd)
-        this.configForm.allowAdmin = Boolean(this.configForm.allowAdmin)
-        this.configForm.allowSetStatus = Boolean(this.configForm.allowSetStatus)
-        this.$nextTick(function () {
-          this.formInited = true
-        })
-        getInfoAPI().then(res => {
-          if (res.data && res.data.code === 200) {
-            that.needMargin = Number(this.configForm.allowNum) - Number(res.data.marginCount)
-            that.loading = false
-          } else {
-            ElMessage.error(res.message)
-            that.loading = false
-            that.$router.push('/')
-          }
-        })
+        if (res.code === 200) {
+          this.configForm = {...res.data}
+          this.$nextTick(function () {
+            this.formInited = true
+          })
+          getInfoAPI().then(res => {
+            if (res.code === 200) {
+              that.needMargin = Number(this.configForm.allowNum) - Number(res.data.marginCount)
+              that.loading = false
+            } else {
+              ElMessage.error(res.msg)
+              that.loading = false
+              that.$router.push('/')
+            }
+          })
+        } else {
+          ElMessage.error(res.msg)
+        }
       })
     },
     initContent() {
       getContent('tip').then(res => {
-        this.contents.push({
-          content: res.data.content,
-          title: '自定义登录以及注册上方提示',
-          contentName: 'tip',
-          showSeq: 1
-        })
+        if (res.code === 200) {
+          this.contents.push({
+            content: res.data.content,
+            title: '自定义登录以及注册上方提示',
+            contentName: 'tip',
+            showSeq: 1
+          })
+        }
       })
       getContent('login').then(res => {
-        this.contents.push({
-          content: res.data.content,
-          title: '自定义登录上方提示',
-          contentName: 'login',
-          showSeq: 2
-        })
+        if (res.code === 200) {
+          this.contents.push({
+            content: res.data.content,
+            title: '自定义登录上方提示',
+            contentName: 'login',
+            showSeq: 2
+          })
+        }
       })
       getContent('register').then(res => {
-        this.contents.push({
-          content: res.data.content,
-          title: '自定义注册上方提示',
-          contentName: 'register',
-          showSeq: 3
-        })
+        if (res.code === 200) {
+          this.contents.push({
+            content: res.data.content,
+            title: '自定义注册上方提示',
+            contentName: 'register',
+            showSeq: 3
+          })
+        }
       })
       getContent('profile').then(res => {
-        this.contents.push({
-          content: res.data.content,
-          title: '自定义个人中心上方提示',
-          contentName: 'profile',
-          showSeq: 4
-        })
+        if (res.code === 200) {
+          this.contents.push({
+            content: res.data.content,
+            title: '自定义个人中心上方提示',
+            contentName: 'profile',
+            showSeq: 4
+          })
+        }
       })
       getContent('updateUsername').then(res => {
-        this.contents.push({
-          content: res.data.content,
-          title: '自定义修改用户名上方提示',
-          contentName: 'updateUsername',
-          showSeq: 5
-        })
+        if (res.code === 200) {
+          this.contents.push({
+            content: res.data.content,
+            title: '自定义修改用户名上方提示',
+            contentName: 'updateUsername',
+            showSeq: 5
+          })
+        }
       })
       getContent('updateCookie').then(res => {
-        this.contents.push({
-          content: res.data.content,
-          title: '自定义修改Cookie上方提示',
-          contentName: 'updateCookie',
-          showSeq: 6
-        })
+        if (res.code === 200) {
+          this.contents.push({
+            content: res.data.content,
+            title: '自定义修改Cookie上方提示',
+            contentName: 'updateCookie',
+            showSeq: 6
+          })
+        }
       })
     }
   }

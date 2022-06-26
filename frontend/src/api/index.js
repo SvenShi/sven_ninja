@@ -30,28 +30,16 @@ export function saveConfig(body) {
     return api.post('saveConfig', {json: body}).json()
 }
 
-export function verifyUser() {
-    const encryptUsername = localStorage.getItem('encryptUsername')
-    const eid = localStorage.getItem('eid')
-    if (!encryptUsername){
-        return {
-            data:{
-                code:444
-            }
-        };
-    }
-    return api.post('verifyUser', {json: {encryptUsername,eid}}).json()
-}
 
-
-export function getUserInfoAPI(eid) {
+export function getUserInfoAPI() {
     const searchParams = new URLSearchParams()
-    searchParams.set('eid', eid)
-    return api.get('userinfo', {searchParams: searchParams}).json()
+    searchParams.set('eid', localStorage.getItem('eid'))
+    searchParams.set('encryptUsername', localStorage.getItem('encryptUsername'))
+    return api.get('userinfo', {searchParams}).json()
 }
 
 export function delAccountAPI(body) {
-    return api.post('delaccount', {json: body}).json()
+    return api.post('delete', {json: body}).json()
 }
 
 export function updateAPI(body) {

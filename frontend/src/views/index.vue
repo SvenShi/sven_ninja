@@ -64,7 +64,7 @@ import {
   disableAPI,
   enableAPI,
   getContent,
-  verifyUser, getInfoAPI
+  getInfoAPI
 } from '@/api'
 import {ElMessage, ElMessageBox} from 'element-plus'
 
@@ -84,58 +84,43 @@ export default {
     }
   },
   mounted() {
+    const eid = localStorage.getItem('eid')
+    console.log(eid)
+    if (eid === '0' || !eid) {
+      this.logout()
+      return
+    }
     this.getInfo()
     this.initContent()
   },
   methods: {
-    async getInfo() {
+    /**
+     * 初始化登录信息
+     */
+    getInfo() {
       const that = this
-      const eid = localStorage.getItem('eid')
-      if (eid === '0' || !eid) {
-        that.logout()
-        return
-      }
-
+      //获取配置信息
       getInfoAPI().then(res => {
-        if (res.data && res.data.code === 200) {
+        if (res.code === 200) {
           that.showEnableCk = Boolean(res.data.allowSetStatus)
-        } else {
-          ElMessage.error(res.message)
-          that.loading = false
-          that.logout()
-          return
-        }
-
-        verifyUser().then(res => {
-          if (res.data && res.data.code === 200){
-            if (eid) {
-              getUserInfoAPI(eid).then(res => {
-                if (res.code === 400) {
-                  ElMessage.error(res.message)
-                  return
-                }
-                if (!res) {
-                  ElMessage.error('获取用户CK信息失败，请重新登录')
-                  that.logout()
-                  return
-                }
-                that.nickName = res.data.username
-                that.userStatus = res.data.status
-                that.timestamp = new Date(res.data.timestamp).toLocaleString()
-                that.loading = false
-              })
-            }
-          }else{
-            if (res.data && res.data.code === 555) {
-              ElMessage.error('检查环境变量中配置的密钥长度是否为8的倍数')
+          //获取用户信息
+          getUserInfoAPI().then(res => {
+            if (res.code === 200) {
+              that.nickName = res.data.username
+              that.userStatus = res.data.status
+              that.timestamp = new Date(res.data.timestamp).toLocaleString()
+              that.loading = false
             } else {
-              ElMessage.error('用户信息验证失败')
+              ElMessage.error(res.msg)
+              that.logout()
+              that.loading = false
             }
-            that.logout()
-            that.loading = false
-          }
-        })
-
+          })
+        } else {
+          ElMessage.error(res.msg)
+          that.logout()
+          that.loading = false
+        }
       })
     },
     logout() {
@@ -149,42 +134,41 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(async () => {
+      }).then(() => {
         that.loading = true
         const eid = localStorage.getItem('eid')
         delAccountAPI({eid}).then(res => {
-              if (res.data.code === 200) {
-                ElMessage.success(res.data.msg)
-                that.logout()
-              } else {
-                ElMessage.error(res.data.msg || res.message)
-              }
-              that.loading = false
-            }
-        )
-
+          if (res.code === 200) {
+            ElMessage.success(res.msg)
+            that.logout()
+          } else {
+            ElMessage.error(res.msg)
+          }
+          that.loading = false
+        })
       })
     },
-    async updateUsername() {
+    updateUsername() {
       this.loading = true
       if (this.username) {
         const eid = localStorage.getItem('eid')
         if (eid) {
-          const body = await updateAPI({eid, ck: null, username: this.username})
-          if (body.data && body.data.code && body.data.code === 200) {
-            localStorage.removeItem('eid')
-            localStorage.removeItem('encryptUsername')
-            await this.$router.push({name: 'login', params: {isUpdate: 'true'}})
-          } else {
-            ElMessage.error(body.data.msg || body.message)
-          }
-          this.loading = false
+          updateAPI({eid, ck: null, username: this.username}).then(res => {
+            if (res.code === 200) {
+              localStorage.removeItem('eid')
+              localStorage.removeItem('encryptUsername')
+              this.$router.push({name: 'login', params: {type: 'success', msg: '用户名修改成功，请重新登录'}})
+            } else {
+              ElMessage.error(res.msg)
+            }
+            this.loading = false
+          })
         }
       } else {
         ElMessage.error("请输入用户名！")
       }
     },
-    async updateCookie() {
+    updateCookie() {
       this.loading = true
       if (this.cookie) {
         const eid = localStorage.getItem('eid')
@@ -202,15 +186,15 @@ export default {
             ElMessage.error('cookie 解析失败，请检查后重试！')
             return
           }
-
-          const body = await updateAPI({eid, ck: cookie, username: null})
-          if (body.data && body.data.code && body.data.code === 200) {
-            ElMessage.success(body.data.msg)
-          } else {
-            ElMessage.error(body.data.msg || body.message)
-          }
+          updateAPI({eid, ck: cookie, username: null}).then(res => {
+            if (res.code === 200) {
+              ElMessage.success(res.msg)
+            } else {
+              ElMessage.error(res.msg)
+            }
+            this.getInfo()
+          })
         }
-        await this.getInfo()
       } else {
         ElMessage.error("请输入Cookie！")
       }
@@ -226,15 +210,16 @@ export default {
         const eid = localStorage.getItem('eid')
         if (eid) {
           disableAPI({eid}).then(res => {
-            if (res.data && res.data.code && res.data.code === 200) {
-              ElMessage.success(res.data.msg)
+            if (res.code === 200) {
+              ElMessage.success(res.msg)
             } else {
-              ElMessage.error(res.data.msg || res.message)
+              ElMessage.error(res.msg)
             }
             that.getInfo()
           })
         } else {
           that.loading = false
+          ElMessage.error("登录信息验证失败，请重新登录")
           that.$router.push('/')
         }
       })
@@ -250,15 +235,16 @@ export default {
         const eid = localStorage.getItem('eid')
         if (eid) {
           enableAPI({eid}).then(res => {
-            if (res.data && res.data.code && res.data.code === 200) {
-              ElMessage.success(res.data.msg)
+            if (res.code === 200) {
+              ElMessage.success(res.msg)
             } else {
-              ElMessage.error(res.data.msg || res.message)
+              ElMessage.error(res.msg)
             }
             that.getInfo()
           })
         } else {
           that.loading = false
+          ElMessage.error("登录信息验证失败，请重新登录")
           that.$router.push('/')
         }
       })
@@ -266,13 +252,19 @@ export default {
     initContent() {
       const that = this
       getContent('profile').then(res => {
-        that.profileContent = res.data.content
+        if (res.code === 200) {
+          that.profileContent = res.data.content
+        }
       })
       getContent('updateUsername').then(res => {
-        that.usernameContent = res.data.content
+        if (res.code === 200) {
+          that.usernameContent = res.data.content
+        }
       })
       getContent('updateCookie').then(res => {
-        that.cookieContent = res.data.content
+        if (res.code === 200) {
+          that.cookieContent = res.data.content
+        }
       })
     }
   }

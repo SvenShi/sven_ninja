@@ -20,17 +20,22 @@
         </div>
       </div>
       <div style="padding: 30px">
-        <el-form :model="userInfo" @submit.native.prevent label-width="30%">
+        <el-form :model="userInfo" @submit.native.prevent label-width="70px">
           <el-form-item label="用户名" prop="username">
             <el-input v-model="userInfo.username" @keyup.enter="loginUser"
-                      style="width: 50%;margin-left: 20px;min-width: 200px"/>
+                      style="width: 50%;margin-left: 20px;min-width: 180px"/>
           </el-form-item>
           <el-form-item v-if="isAdmin" label="密码" prop="password">
             <el-input v-model="userInfo.password" ref="passwordInput" type="password" @keyup.enter="loginUser"
-                      style="width: 50%;margin-left: 20px;min-width: 200px"/> <el-icon style="margin-left: 5px;cursor: pointer" @click="isAdmin = false;userInfo.password = '';"><CircleClose class="icon" /></el-icon>
+                      style="width: 50%;margin-left: 20px;min-width: 180px"/>
+            <el-icon style="margin-left: 5px;cursor: pointer" @click="isAdmin = false;userInfo.password = '';">
+              <CircleClose class="icon"/>
+            </el-icon>
           </el-form-item>
           <div style="text-align: center;">
-            <el-button type="primary" v-loading.fullscreen.lock="loading" :disabled="!userInfo.username" @click="loginUser">登录</el-button>
+            <el-button type="primary" v-loading.fullscreen.lock="loading" :disabled="!userInfo.username"
+                       @click="loginUser">登录
+            </el-button>
             <el-button @click="openRegister" v-if="allowAdd">注册</el-button>
           </div>
         </el-form>
@@ -49,7 +54,7 @@
         </div>
       </div>
       <div style="padding: 30px">
-        <el-form ref="registerForm" @submit.native.prevent :model="userInfo" :rules="registerRules" label-width="30%" >
+        <el-form ref="registerForm" @submit.native.prevent :model="userInfo" :rules="registerRules" label-width="30%">
           <el-form-item label="用户名" prop="username">
             <el-input v-model="userInfo.username" @keyup.enter="registerConfirm()"
                       style="width: 50%;margin-left: 20px;min-width: 200px"></el-input>
@@ -114,20 +119,24 @@ export default {
     } else {
       this.getInfo()
     }
-    if (this.$route.params.isUpdate){
-      ElMessage.success("用户名修改成功，请重新登录！")
+    if (this.$route.params.type) {
+      if (this.$route.params.type === 'success'){
+        ElMessage.success(this.$route.params.msg)
+      }else {
+        ElMessage.error(this.$route.params.msg)
+      }
     }
     this.initContent()
   },
   methods: {
     async getInfo() {
-      getInfoAPI().then(res =>{
-        if (res.data && res.data.code === 200){
+      getInfoAPI().then(res => {
+        if (res.code === 200){
           this.marginCount = res.data.marginCount
           this.allowAdd = res.data.allowAdd
           this.loading = false
         }else {
-          ElMessage.error(res.message)
+          ElMessage.error(res.msg)
           this.loading = false
           this.logout()
         }
@@ -144,39 +153,27 @@ export default {
         }
       }
       if (this.userInfo.username) {
-        login(this.userInfo).then(resData =>{
-          this.loading = false
-          if (resData.code === 400) {
-            ElMessage.error(resData.message)
-            return
-          }
-          let res = resData.data
-          if (res.errCode === 0) {
-            //成功
-            localStorage.setItem('eid', res.eid)
-            localStorage.setItem('encryptUsername', res.encryptUsername)
-            if (res.eid === 0) {
-              this.$router.push({name:'manage',params:{token:res.token}})
-            } else {
-              this.$router.push("/")
-            }
-          } else {
-            if (res.errCode === 1) {
+        login(this.userInfo).then(res => {
+          that.loading = false
+          if (res.code === 200) {
+            if (res.data.isAdmin) {
               //管理员登录
-              this.isAdmin = true
-              this.$nextTick(function (){
+              that.isAdmin = true
+              that.$nextTick(function () {
                 that.$refs.passwordInput.focus()
               })
+            } else {
+              //成功
+              localStorage.setItem('eid', res.data.eid)
+              localStorage.setItem('encryptUsername', res.data.encryptUsername)
+              if (res.data.eid === 0) {
+                that.$router.push({name: 'manage', params: {token: res.data.token}})
+              } else {
+                that.$router.push("/")
+              }
             }
-            if (res.errCode === 2) {
-              ElMessage.error('该账号未启用，禁止登录')
-            }
-            if (res.errCode === 404) {
-              ElMessage.error('未注册的用户')
-            }
-            if (res.errCode === 500) {
-              ElMessage.error('未知错误')
-            }
+          } else {
+            ElMessage.error(res.msg)
           }
         })
       } else {
@@ -206,26 +203,17 @@ export default {
             return
           }
 
-          const resData = (await registerUser(this.userInfo))
-          if (resData.code === 400) {
-            ElMessage.error(resData.message)
-            return
-          }
-          const res = resData.data
-          if (res.errCode === 0) {
-            ElMessage.success(res.msg)
-            this.showLogin = true
-            this.showRegister = false
-            this.loading = false
-          } else {
-            if (res.errCode === 201) {
-              ElMessage.error('用户名重复')
+          registerUser(this.userInfo).then(res =>{
+            if (res.code === 200){
+              ElMessage.success(res.msg)
+              this.showLogin = true
+              this.showRegister = false
+              this.loading = false
+            }else {
+              ElMessage.error(res.msg)
+              this.loading = false
             }
-            if (res.errCode === 500) {
-              ElMessage.error('未知错误')
-            }
-            this.loading = false
-          }
+          })
         }
       })
     },
@@ -264,7 +252,8 @@ a {
 a:hover {
   color: #4f6fff;
 }
-.icon:hover{
+
+.icon:hover {
   color: #ff0000;
 }
 </style>
