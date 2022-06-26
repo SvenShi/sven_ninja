@@ -133,7 +133,7 @@ pm2 start
    pnpm install
    cp .env.example .env
    ```
-3. 修改环境变量
+3. 修改环境变量(可以跳过，启动之后进入页面中设置)
 
    打开环境变量配置文件
    ```bash
