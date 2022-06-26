@@ -3,7 +3,7 @@ const CryptoJS = require("crypto-js")
 const NinjaConfig = require('./ninjaConfig');
 
 //秘钥
-const key = CryptoJS.enc.Utf8.parse(NinjaConfig.getInstance().usernameSalt || 'ninja123');
+const key = CryptoJS.enc.Utf8.parse(NinjaConfig.getConfig().usernameSalt || 'ninja123');
 const iv = CryptoJS.enc.Utf8.parse('thisprojectisshit');
 const option = {
     iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7

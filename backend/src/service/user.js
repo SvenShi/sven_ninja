@@ -3,13 +3,12 @@
 require('dotenv').config();
 
 const {
-    addEnv, delEnv, getEnvs, updateEnv, disable, enable, getToken
+    addEnv, delEnv, getEnvs, updateEnv, disable, enable
 } = require('./ql');
-
 const {
     encrypt, decrypt
 } = require('../util/encryptUtil')
-
+const { v4: uuidv4 } = require('uuid');
 const NinjaConfig = require('../util/ninjaConfig');
 const JsonResult = require('../util/jsonResult');
 
@@ -56,17 +55,13 @@ module.exports = class User {
      * 登录
      */
     async login() {
-        let config = NinjaConfig.getInstance()
+        let config = NinjaConfig.getConfig()
         if (this.username === config.adminUsername) {
             if (config.allowAdmin) {
                 //管理员登录
                 if (this.password) {
                     if (this.password === config.adminPassword) {
-                        try {
-                            staticToken = await getToken()
-                        } catch (exception) {
-                            staticToken = Date.now() + encrypt(this.username)
-                        }
+                        staticToken = uuidv4()
                         return JsonResult.success({username: config.adminUsername, eid: 0, token: staticToken});
                     } else {
                         return JsonResult.error('用户名或密码不匹配', {username: config.adminUsername})
@@ -105,7 +100,7 @@ module.exports = class User {
      * 注册
      */
     async register() {
-        let config = NinjaConfig.getInstance()
+        let config = NinjaConfig.getConfig()
         if (this.username === config.adminUsername) {
             return JsonResult.error('用户已存在')
         }
@@ -226,14 +221,13 @@ module.exports = class User {
         envs.map(item => {
             userNames.add(item.remarks);
         })
-        let config = NinjaConfig.getInstance()
+        let config = NinjaConfig.getConfig()
 
         return JsonResult.success({
             marginCount: config.allowNum - userNames.size,
             allowAdd: config.allowAdd,
             allowSetStatus: config.allowSetStatus
         })
-
     }
 
     /**
@@ -241,7 +235,7 @@ module.exports = class User {
      */
     async getAllConfig() {
         if (this.token === staticToken) {
-            return JsonResult.success(NinjaConfig.getInstance())
+            return JsonResult.success(NinjaConfig.getConfig())
         } else {
             return JsonResult.error('您无权操作')
         }
@@ -252,7 +246,7 @@ module.exports = class User {
      */
     async saveConfig(config) {
         if (this.token === staticToken) {
-            NinjaConfig.getInstance().saveConfig(config)
+            NinjaConfig.saveConfig(config)
             return JsonResult.success('修改成功')
         } else {
             return JsonResult.error('您无权操作')

@@ -7,6 +7,7 @@ const body = require('koa-body');
 const serve = require('koa-static');
 const User = require('./src/service/user');
 const Content = require('./src/service/Content')
+const DbUtil = require('./src/util/DbUtil')
 const packageJson = require('./package.json');
 
 // Create express instance
@@ -105,6 +106,8 @@ router.get('/api/getAllConfig', async (ctx) => {
     const token = query.token;
     ctx.body = await new User({token}).getAllConfig();
 });
+
+
 
 router.post('/api/saveConfig', body(), async (ctx) => {
     const body = ctx.request.body;

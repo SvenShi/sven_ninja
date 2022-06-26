@@ -19,8 +19,8 @@
         <div class="card-body text-base leading-6" v-html="loginContent">
         </div>
       </div>
-      <div style="padding: 30px">
-        <el-form :model="userInfo" @submit.native.prevent label-width="70px">
+      <div style="padding: 30px;">
+        <el-form :model="userInfo" @submit.native.prevent label-width="30%">
           <el-form-item label="用户名" prop="username">
             <el-input v-model="userInfo.username" @keyup.enter="loginUser"
                       style="width: 50%;margin-left: 20px;min-width: 180px"/>

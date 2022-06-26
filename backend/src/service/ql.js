@@ -11,7 +11,7 @@ const NinjaConfig = require('../util/ninjaConfig');
 
 
 async function getToken() {
-    let config = NinjaConfig.getInstance()
+    let config = NinjaConfig.getConfig()
     const body = await api({
         url: 'open/auth/token', searchParams: {
             client_id: config.clientId, client_secret: config.clientSecret,
@@ -24,7 +24,7 @@ async function getToken() {
 }
 
 module.exports.getToken = async () => {
-    let config = NinjaConfig.getInstance()
+    let config = NinjaConfig.getConfig()
     const body = await api({
         url: 'open/auth/token', searchParams: {
             client_id: config.clientId, client_secret: config.clientSecret,

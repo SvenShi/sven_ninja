@@ -1,7 +1,7 @@
 {
   "version": "22.06.26",
   "scripts": {
-    "dev": "nodemon app.js"
+    "dev": "nodemon --ignore db/ app.js"
   },
   "engines": {
     "node": ">=14"
@@ -17,6 +17,7 @@
     "koa-body": "^4.2.0",
     "koa-log4": "^2.3.2",
     "koa-static": "^5.0.0",
-    "nodemon": "^2.0.18"
+    "nodemon": "^2.0.18",
+    "uuid": "^8.3.2"
   }
 }
