@@ -20,6 +20,9 @@ module.exports = class NinjaConfig {
 
     static getConfig() {
         if (!this.configData) {
+            if (!fs.existsSync(FILE_PATH)) {
+                fs.writeFileSync(FILE_PATH, '')
+            }
             let buffer = fs.readFileSync(FILE_PATH)
             let configStr = buffer.toString()
             if (configStr) {

@@ -11,17 +11,37 @@ module.exports = class DbUtil {
     dbName;
     dbPath;
     db;
+    init;
 
     constructor(dbName) {
         this.dbName = dbName
         this.dbPath = filePrefixPath + dbName + fileSuffixPath
+        this.init = false
         this.initDbData()
     }
+
+    /**
+     * 获取实例
+     */
+    static getInstance(dbName) {
+        let dbUtil = dbMap.get(dbName)
+        if (!dbUtil) {
+            dbUtil = new DbUtil(dbName)
+            dbMap.set(dbName, dbUtil);
+        }else {
+            dbUtil.init = false
+        }
+        return dbUtil;
+    }
+
 
     /**
      * 初始化dbUtil
      */
     initDbData() {
+        if (!fs.existsSync(this.dbPath)) {
+            fs.writeFileSync(this.dbPath, '')
+        }
         let buffer = fs.readFileSync(this.dbPath)
         let dataStr = buffer.toString()
         let db = {};
@@ -38,6 +58,7 @@ module.exports = class DbUtil {
             db.length = 0
             db.index = 0;
             db.updateDate = new Date();
+            this.init = true
             let dbStr = JSON.stringify(db)
             fs.writeFileSync(this.dbPath, dbStr);
         }
@@ -53,36 +74,18 @@ module.exports = class DbUtil {
             data[key] = value;
         })
         this.db.data = data
-        fs.writeFile(this.dbPath, JSON.stringify(this.db), (err) => {
-            if (err) {
-                throw err;
-            }
-        })
+        fs.writeFileSync(this.dbPath, JSON.stringify(this.db))
         this.db.data = dataMap
     }
 
-
-    /**
-     * 获取实例
-     */
-    static getInstance(dbName) {
-        let dbUtil = dbMap.get(dbName)
-        if (!dbUtil) {
-            dbUtil = new DbUtil(dbName)
-            dbMap.set(dbName, dbUtil);
-        }
-        return dbUtil;
-    }
 
     insert(data) {
         this.db.index++
         data._id = uuidv4();
         data._index = this.db.index
         if (this.db.data.size > 0 || Object.keys(this.db.data).length !== 0) {
-            console.log(1)
             this.db.data.set(data._id, data);
         } else {
-            console.log(2)
             this.db.data = new Map()
             this.db.data.set(data._id, data);
         }
@@ -97,9 +100,7 @@ module.exports = class DbUtil {
     update(data) {
         let oldValue = this.db.data.get(data._id)
         for (let dataKey in data) {
-            if (data[dataKey]) {
-                oldValue[dataKey] = data[dataKey]
-            }
+            oldValue[dataKey] = data[dataKey]
         }
         this.saveToFile()
     }
@@ -111,7 +112,7 @@ module.exports = class DbUtil {
 
     selectAll() {
         if (this.db.data.size > 0){
-            return this.db.data.values
+            return Array.from(this.db.data.values())
         }else {
             return []
         }

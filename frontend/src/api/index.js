@@ -54,10 +54,8 @@ export function enableAPI(body) {
     return api.post('enable', {json: body}).json()
 }
 
-export function getContent(contentName) {
-    const searchParams = new URLSearchParams()
-    searchParams.set('contentName', contentName)
-    return api.get('getContent', {searchParams: searchParams}).json()
+export function getContent() {
+    return api.get('getContent').json()
 }
 
 export function setContent(body) {

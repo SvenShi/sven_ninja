@@ -56,16 +56,15 @@
           <el-tab-pane label="自定义标语" name="slogan"
                        style="overflow:hidden; overflow-y: auto; height: calc(100vh - 300px); text-align: center">
             <div style="margin-left: 10px;margin-right: 10px">
-              <div style="padding-bottom: 10px" v-for="item in sortContents"
-                   :key="item.showSeq">
-                <p style="float: left;font-size: 18px;margin-bottom: 10px">{{ item.title }}</p>
+              <div style="padding-bottom: 10px" v-for="item in sortContents">
+                <p style="float: left;font-size: 18px;margin-bottom: 10px">{{ '自定义' + item.name }}</p>
                 <el-input
                     v-model="item.content"
                     :autosize="{ minRows: 4, maxRows: 8 }"
                     type="textarea"
                 />
                 <div style="text-align:right; margin-top: 10px">
-                  <el-button type="success" auto @click="customContent(item.contentName,item.content)">修改</el-button>
+                  <el-button type="success" auto @click="updateContent(item)">修改</el-button>
                 </div>
               </div>
             </div>
@@ -212,7 +211,7 @@ export default {
   },
   methods: {
     sortContent(a, b) {
-      return a.showSeq - b.showSeq
+      return a._index - b._index
     },
     verify() {
       let that = this
@@ -232,8 +231,8 @@ export default {
         }
       })
     },
-    customContent(contentName, content) {
-      setContent({contentName, content}).then(res => {
+    updateContent(content) {
+      setContent(content).then(res => {
         if (res.code === 200) {
           ElMessage.success(res.msg)
         } else {
@@ -278,64 +277,14 @@ export default {
       })
     },
     initContent() {
-      getContent('tip').then(res => {
+      getContent().then(res => {
         if (res.code === 200) {
-          this.contents.push({
-            content: res.data.content,
-            title: '自定义登录以及注册上方提示',
-            contentName: 'tip',
-            showSeq: 1
-          })
-        }
-      })
-      getContent('login').then(res => {
-        if (res.code === 200) {
-          this.contents.push({
-            content: res.data.content,
-            title: '自定义登录上方提示',
-            contentName: 'login',
-            showSeq: 2
-          })
-        }
-      })
-      getContent('register').then(res => {
-        if (res.code === 200) {
-          this.contents.push({
-            content: res.data.content,
-            title: '自定义注册上方提示',
-            contentName: 'register',
-            showSeq: 3
-          })
-        }
-      })
-      getContent('profile').then(res => {
-        if (res.code === 200) {
-          this.contents.push({
-            content: res.data.content,
-            title: '自定义个人中心上方提示',
-            contentName: 'profile',
-            showSeq: 4
-          })
-        }
-      })
-      getContent('updateUsername').then(res => {
-        if (res.code === 200) {
-          this.contents.push({
-            content: res.data.content,
-            title: '自定义修改用户名上方提示',
-            contentName: 'updateUsername',
-            showSeq: 5
-          })
-        }
-      })
-      getContent('updateCookie').then(res => {
-        if (res.code === 200) {
-          this.contents.push({
-            content: res.data.content,
-            title: '自定义修改Cookie上方提示',
-            contentName: 'updateCookie',
-            showSeq: 6
-          })
+          let data = res.data
+          for (let dataKey in data) {
+            this.contents.push(data[dataKey])
+          }
+        } else {
+          ElMessage.error(res.msg)
         }
       })
     }

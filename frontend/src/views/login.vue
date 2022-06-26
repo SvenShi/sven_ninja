@@ -6,7 +6,7 @@
           <p class="card-title">Ninja提醒您</p>
         </div>
       </div>
-      <div class="card-body text-base leading-6" v-html="tipContent">
+      <div class="card-body text-base leading-6" v-html="contents.tip.content">
       </div>
       <div class="card-footet"></div>
     </div>
@@ -16,7 +16,7 @@
         <div class="flex items-center justify-between">
           <p class="card-title">登录</p>
         </div>
-        <div class="card-body text-base leading-6" v-html="loginContent">
+        <div class="card-body text-base leading-6" v-html="contents.login.content">
         </div>
       </div>
       <div style="padding: 30px;">
@@ -50,7 +50,7 @@
           <p class="card-title">注册</p>
           <span class="ml-2 px-2 py-1 bg-gray-200 rounded-full font-normal text-xs">余量：{{ marginCount }}</span>
         </div>
-        <div class="card-body text-base leading-6" v-html="registerContent">
+        <div class="card-body text-base leading-6" v-html="contents.register.content">
         </div>
       </div>
       <div style="padding: 30px">
@@ -87,9 +87,11 @@ export default {
     return {
       loading: true,
       dialogVisible: false,
-      tipContent: '',
-      loginContent: '',
-      registerContent: '',
+      contents: {
+        tip:{},
+        login:{},
+        register:{}
+      },
       marginCount: 0,
       allowAdd: false,
       showRegister: false,
@@ -120,9 +122,9 @@ export default {
       this.getInfo()
     }
     if (this.$route.params.type) {
-      if (this.$route.params.type === 'success'){
+      if (this.$route.params.type === 'success') {
         ElMessage.success(this.$route.params.msg)
-      }else {
+      } else {
         ElMessage.error(this.$route.params.msg)
       }
     }
@@ -131,11 +133,11 @@ export default {
   methods: {
     async getInfo() {
       getInfoAPI().then(res => {
-        if (res.code === 200){
+        if (res.code === 200) {
           this.marginCount = res.data.marginCount
           this.allowAdd = res.data.allowAdd
           this.loading = false
-        }else {
+        } else {
           ElMessage.error(res.msg)
           this.loading = false
           this.logout()
@@ -203,13 +205,13 @@ export default {
             return
           }
 
-          registerUser(this.userInfo).then(res =>{
-            if (res.code === 200){
+          registerUser(this.userInfo).then(res => {
+            if (res.code === 200) {
               ElMessage.success(res.msg)
               this.showLogin = true
               this.showRegister = false
               this.loading = false
-            }else {
+            } else {
               ElMessage.error(res.msg)
               this.loading = false
             }
@@ -223,14 +225,12 @@ export default {
     },
     async initContent() {
       const that = this
-      getContent('tip').then(res => {
-        that.tipContent = res.data.content
-      })
-      getContent('login').then(res => {
-        that.loginContent = res.data.content
-      })
-      getContent('register').then(res => {
-        that.registerContent = res.data.content
+      getContent().then(res => {
+        if (res.code === 200) {
+          that.contents = res.data
+        }else {
+          ElMessage.error(res.msg)
+        }
       })
     }
   }

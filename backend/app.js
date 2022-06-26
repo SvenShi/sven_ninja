@@ -88,17 +88,13 @@ router.post('/api/verifyToken', body(), async (ctx) => {
 
 
 router.get('/api/getContent', async (ctx) => {
-    const query = ctx.query;
-    const fileName = query.contentName;
-    ctx.body = await new Content({fileName}).readFile();
+    ctx.body = await Content.getAllContent()
 });
 
 
 router.post('/api/setContent', body(), async (ctx) => {
     const body = ctx.request.body;
-    const fileName = body.contentName;
-    const fileContent = body.content;
-    ctx.body = await new Content({fileName, fileContent}).writFile();
+    ctx.body = Content.updateContent(body)
 });
 
 router.get('/api/getAllConfig', async (ctx) => {

@@ -4,7 +4,7 @@
       <div class="card-header">
         <p class="card-title">个人中心</p>
       </div>
-      <div class="card-body text-base leading-6" v-html="profileContent">
+      <div class="card-body text-base leading-6" v-html="contents.profile.content">
       </div>
       <div class="card-body">
         <p>用户名：{{ nickName }}</p>
@@ -28,7 +28,7 @@
       <div class="card-header">
         <p class="card-title">修改用户名</p>
       </div>
-      <div class="card-body text-base leading-6" v-html="usernameContent">
+      <div class="card-body text-base leading-6" v-html="contents.username.content">
       </div>
       <div class="card-body text-center">
         <el-input v-model="username" style="min-width: 200px" @keyup.enter="updateUsername" clearable
@@ -43,7 +43,7 @@
       <div class="card-header">
         <p class="card-title">更新Cookie</p>
       </div>
-      <div class="card-body text-base leading-6" v-html="cookieContent">
+      <div class="card-body text-base leading-6" v-html="contents.cookie.content">
       </div>
       <div class="card-body text-center">
         <el-input v-model="cookie" style="min-width: 300px" @keyup.enter="updateCookie" clearable
@@ -72,9 +72,11 @@ export default {
   data() {
     return {
       loading: true,
-      profileContent: '',
-      usernameContent: '',
-      cookieContent: '',
+      contents:{
+        profile:{},
+        username:{},
+        cookie:{}
+      },
       username: '',
       cookie: '',
       nickName: undefined,
@@ -251,19 +253,11 @@ export default {
     },
     initContent() {
       const that = this
-      getContent('profile').then(res => {
+      getContent().then(res => {
         if (res.code === 200) {
-          that.profileContent = res.data.content
-        }
-      })
-      getContent('updateUsername').then(res => {
-        if (res.code === 200) {
-          that.usernameContent = res.data.content
-        }
-      })
-      getContent('updateCookie').then(res => {
-        if (res.code === 200) {
-          that.cookieContent = res.data.content
+          that.contents = res.data
+        }else {
+          ElMessage.error(res.msg)
         }
       })
     }

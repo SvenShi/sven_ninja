@@ -201,3 +201,4 @@ node_modules
 dist
 dist-ssr
 *.local
+/backend/src/db/*
