@@ -23,6 +23,7 @@
           <p>3.现在可以点击logo到达首页</p>
           <p>4.环境变量ALLOW_ADMIN=true 默认值改为true</p>
           <p>5.页面全部重构一边</p><br/>
+          <p>6.响应结果统一封装</p><br/>
 
           <p>2022/06/09</p><br/>
           <p style="color: red;">1.环境变量.env文件添加 USERNAME_SALT=ninja123 变量，该变量用来加密用户名</p>
