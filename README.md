@@ -128,7 +128,7 @@ pm2 start
    进入容器命令 `docker exec -it qinglong bash` 需要对应容器名
 
    ```bash
-   git clone https://github.com/sw-ashai/ashai_ninja.git /ql/ninja
+   git clone https://github.com/SvenShi/sven_ninja.git /ql/ninja
    cd /ql/ninja/backend
    pnpm install
    cp .env.example .env
