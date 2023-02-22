@@ -81,6 +81,8 @@ import {
   registerUser,
   getContent
 } from '@/api'
+import {mapStores} from "pinia";
+import {useManageStore} from "@/manageStore";
 
 export default {
   data() {
@@ -88,9 +90,9 @@ export default {
       loading: true,
       dialogVisible: false,
       contents: {
-        tip:{},
-        login:{},
-        register:{}
+        tip: {},
+        login: {},
+        register: {}
       },
       marginCount: 0,
       allowAdd: false,
@@ -114,19 +116,15 @@ export default {
       }
     }
   },
+  computed: {
+    ...mapStores(useManageStore)
+  },
   mounted() {
     const eid = localStorage.getItem('eid')
     if (eid !== '0' && eid) {
       this.$router.push("/")
     } else {
       this.getInfo()
-    }
-    if (this.$route.params.type) {
-      if (this.$route.params.type === 'success') {
-        ElMessage.success(this.$route.params.msg)
-      } else {
-        ElMessage.error(this.$route.params.msg)
-      }
     }
     this.initContent()
   },
@@ -169,17 +167,22 @@ export default {
               localStorage.setItem('eid', res.data.eid)
               localStorage.setItem('encryptUsername', res.data.encryptUsername)
               if (res.data.eid === 0) {
-                that.$router.push({name: 'manage', params: {token: res.data.token}})
+                this.manageStore.token = res.data.token
+                that.$router.push({name: 'manage'})
               } else {
                 that.$router.push("/")
               }
             }
           } else {
             ElMessage.error(res.msg)
+            localStorage.removeItem('eid')
+            localStorage.removeItem('encryptUsername')
           }
         })
       } else {
         ElMessage.error('请输入用户名')
+        localStorage.removeItem('eid')
+        localStorage.removeItem('encryptUsername')
       }
     },
     openRegister() {
@@ -191,11 +194,11 @@ export default {
       await this.$refs.registerForm.validate(async valid => {
         if (valid) {
           const ptKey =
-              this.userInfo.cookie.match(/pt_key=(.*?);/) &&
-              this.userInfo.cookie.match(/pt_key=(.*?);/)[1]
+            this.userInfo.cookie.match(/pt_key=(.*?);/) &&
+            this.userInfo.cookie.match(/pt_key=(.*?);/)[1]
           const ptPin =
-              this.userInfo.cookie.match(/pt_pin=(.*?);/) &&
-              this.userInfo.cookie.match(/pt_pin=(.*?);/)[1]
+            this.userInfo.cookie.match(/pt_pin=(.*?);/) &&
+            this.userInfo.cookie.match(/pt_pin=(.*?);/)[1]
           if (ptKey && ptPin) {
             this.userInfo.ptKey = ptKey
             this.userInfo.ptPin = ptPin
@@ -228,7 +231,7 @@ export default {
       getContent().then(res => {
         if (res.code === 200) {
           that.contents = res.data
-        }else {
+        } else {
           ElMessage.error(res.msg)
         }
       })

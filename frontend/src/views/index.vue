@@ -87,7 +87,6 @@ export default {
   },
   mounted() {
     const eid = localStorage.getItem('eid')
-    console.log(eid)
     if (eid === '0' || !eid) {
       this.logout()
       return

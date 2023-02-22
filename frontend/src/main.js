@@ -17,6 +17,7 @@ import 'element-plus/es/components/message/style/css'
 import 'element-plus/es/components/message-box/style/css'
 import 'element-plus/dist/index.css'
 import {createApp} from 'vue'
+import { createPinia } from 'pinia'
 import App from './App.vue'
 import './index.css'
 import router from './router'
@@ -25,6 +26,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 const components = [ElButton, ElInput, ElMessageBox, ElSwitch, ElMessage, ElForm, ElFormItem, ElTabs, ElTabPane, ElDialog, ElLink, ElIcon]
 const plugins = [ElMessage, ElMessageBox, ElLoading]
 
+const pinia = createPinia();
 const app = createApp(App)
 
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
@@ -39,5 +41,6 @@ plugins.forEach((plugin) => {
     app.use(plugin)
 })
 
+app.use(pinia)
 app.use(router)
 app.mount('#app')

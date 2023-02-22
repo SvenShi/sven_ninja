@@ -7,7 +7,6 @@ const body = require('koa-body');
 const serve = require('koa-static');
 const User = require('./src/service/user');
 const Content = require('./src/service/Content')
-const DbUtil = require('./src/util/DbUtil')
 const packageJson = require('./package.json');
 
 // Create express instance
@@ -18,6 +17,7 @@ const handler = async (ctx, next) => {
     try {
         await next();
     } catch (err) {
+        console.log(err);
         ctx.status = 200;
         ctx.body = {
             code: err.status || err.statusCode || 500, msg: err.message,

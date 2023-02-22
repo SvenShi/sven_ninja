@@ -85,6 +85,8 @@ import {
   saveConfig
 } from '@/api'
 import {ElMessage, ElMessageBox} from 'element-plus'
+import {mapStores} from "pinia";
+import {useManageStore} from "@/manageStore";
 
 export default {
   data() {
@@ -138,15 +140,10 @@ export default {
         usernameSalt: [
           {
             required: true, validator: (rule, value, callback) => {
-              if (value) {
-                if (value.length % 8 !== 0) {
-                  callback(new Error("密钥必须为8的倍数！"))
-                } else {
-                  callback()
-                }
-              } else {
+              if (!value) {
                 callback(new Error("必须输入密钥"))
               }
+              callback()
             }, trigger: 'blur'
           }
         ],
@@ -205,6 +202,7 @@ export default {
     }
   },
   computed: {
+    ...mapStores(useManageStore),
     sortContents: function () {
       return this.contents.sort(this.sortContent);
     }
@@ -216,18 +214,21 @@ export default {
     verify() {
       let that = this
       return new Promise(resolve => {
-        that.token = that.$route.params.token
+        that.token = that.manageStore.token
         if (that.token) {
           verifyToken(that.token).then(res => {
             if (res.code !== 200) {
               that.exception.noToken = true
+              that.manageStore.alertMsg('error','您没有权限访问此页面')
+              that.$router.push({name: 'login'})
               resolve(false)
             }
             resolve(true)
           })
         } else {
           resolve(false)
-          that.$router.push({name: 'login', params: {type: 'error', msg: '您没有权限访问此页面'}})
+          that.manageStore.alertMsg('error','您没有权限访问此页面')
+          that.$router.push({name: 'login'})
         }
       })
     },

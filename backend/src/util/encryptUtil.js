@@ -3,18 +3,22 @@ const CryptoJS = require("crypto-js")
 const NinjaConfig = require('./ninjaConfig');
 
 //秘钥
-const key = CryptoJS.enc.Utf8.parse(NinjaConfig.getConfig().usernameSalt || 'ninja123');
 const iv = CryptoJS.enc.Utf8.parse('thisprojectisshit');
 const option = {
-    iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
+  iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
 }
+
+function saltProcess(salt) {
+  return salt || 'ninja';
+}
+
 /**
  * 加密
  * {param} plaintText 加密明文
  * return str 加密结果
  */
 module.exports.encrypt = (plaintText) => {
-    return CryptoJS.AES.encrypt(plaintText, key, option).toString();
+  return CryptoJS.AES.encrypt(plaintText, saltProcess(NinjaConfig.getConfig().usernameSalt), option).toString();
 
 }
 
@@ -24,8 +28,10 @@ module.exports.encrypt = (plaintText) => {
  * return str 解密结果
  */
 module.exports.decrypt = (encryptedBase64Str) => {
-    let content = String(encryptedBase64Str);//把object转化为string
-    let bytes = CryptoJS.AES.decrypt(content.toString(), key, option);
+  let content = String(encryptedBase64Str);//把object转化为string
+  let bytes = CryptoJS.AES.decrypt(content.toString(), saltProcess(NinjaConfig.getConfig().usernameSalt), option);
 
-    return bytes.toString(CryptoJS.enc.Utf8);
+  return bytes.toString(CryptoJS.enc.Utf8);
 }
+
+
