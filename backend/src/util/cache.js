@@ -5,7 +5,9 @@ const cache = {
     __cache.set(key, value)
   },
   delete(key) {
-    __cache.delete(key)
+    if (this.hasKey(key)){
+      __cache.delete(key)
+    }
   },
   setExpire(key, value, time) {
     let that = this

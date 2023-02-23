@@ -89,6 +89,7 @@ module.exports = class User {
    */
   async verifyToken() {
     if (cache.hasKey(this.token)) {
+      cache.delete(this.token)
       return JsonResult.success()
     } else {
       return JsonResult.error()
@@ -234,6 +235,7 @@ module.exports = class User {
    */
   async getAllConfig() {
     if (cache.hasKey(this.token)) {
+      cache.delete(this.token)
       return JsonResult.success(NinjaConfig.getConfig())
     } else {
       return JsonResult.error('您无权操作')
