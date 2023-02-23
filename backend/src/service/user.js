@@ -61,7 +61,7 @@ module.exports = class User {
         if (this.password) {
           if (this.password === config.adminPassword) {
             let uuid = uuidv4();
-            cache.setExpire(uuid, this.username, 1000 * 60 * 5)
+            cache.setExpire(uuid, this.username, 1000 * 60 * 60 * 12)
             return JsonResult.success({username: config.adminUsername, eid: 0, token: uuid});
           } else {
             return JsonResult.error('用户名或密码不匹配', {username: config.adminUsername})
