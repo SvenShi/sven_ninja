@@ -89,7 +89,6 @@ module.exports = class User {
    */
   async verifyToken() {
     if (cache.hasKey(this.token)) {
-      cache.delete(this.token)
       return JsonResult.success()
     } else {
       return JsonResult.error()
@@ -235,10 +234,9 @@ module.exports = class User {
    */
   async getAllConfig() {
     if (cache.hasKey(this.token)) {
-      cache.delete(this.token)
       return JsonResult.success(NinjaConfig.getConfig())
     } else {
-      return JsonResult.error('您无权操作')
+      return JsonResult.error('登录过期，请重新登录！')
     }
   }
 
@@ -246,11 +244,11 @@ module.exports = class User {
    *  保存配置信息  需要验证token
    */
   async saveConfig(config) {
-    if (this.token === staticToken) {
+    if (cache.hasKey(this.token)) {
       NinjaConfig.saveConfig(config)
       return JsonResult.success('修改成功')
     } else {
-      return JsonResult.error('您无权操作')
+      return JsonResult.error('登录过期，请重新登录！')
     }
   }
 };
